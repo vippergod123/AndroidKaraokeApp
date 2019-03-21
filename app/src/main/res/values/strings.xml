@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">AndroidKaraokeApp</string>
+    <string name="title_home">Song</string>
+    <string name="title_dashboard">Favorites</string>
+    <string name="title_notifications">Users</string>
+    <string name="record_icon">Users</string>
+    <string name="search_text_view">Tìm kiếm bài hát, ca sĩ</string>
+    <string name="song">Bài hát</string>
+    <string name="singer">Ca sĩ</string>
+</resources>
