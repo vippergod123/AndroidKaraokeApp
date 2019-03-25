@@ -5,10 +5,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.example.androidkaraokeapp.R
 
-class ListRecordRecyclerViewAdapter() : RecyclerView.Adapter<ListRecordViewHolder>() {
-    override fun onBindViewHolder(viewHolder: ListRecordViewHolder, position: Int) {
-        viewHolder.bind("Asd")
-    }
+class ListRecordRecyclerViewAdapter : RecyclerView.Adapter<ListRecordViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, position: Int): ListRecordViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.list_record_view_holder,parent,false)
@@ -17,6 +14,10 @@ class ListRecordRecyclerViewAdapter() : RecyclerView.Adapter<ListRecordViewHolde
 
     override fun getItemCount(): Int {
         return 10
+    }
+
+    override fun onBindViewHolder(viewHolder: ListRecordViewHolder, position: Int) {
+        viewHolder.bind("Asd")
     }
 
 }

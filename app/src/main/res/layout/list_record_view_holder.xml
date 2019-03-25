@@ -11,7 +11,7 @@
                 android:layout_width="wrap_content"
                 android:layout_gravity="center"
                 android:layout_height="wrap_content" app:srcCompat="@drawable/ic_launcher_background"
-                android:id="@+id/imageView"/>
+        />
         <TextView
                 android:text="TextView"
                 android:layout_width="match_parent"

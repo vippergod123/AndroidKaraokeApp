@@ -4,13 +4,12 @@ import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
-import android.widget.FrameLayout
 import com.example.androidkaraokeapp.R
+import com.example.androidkaraokeapp.ulti.HandleMemoryStorage
+import com.example.androidkaraokeapp.view.Fragment.FavoriteSongFragment
 import com.example.androidkaraokeapp.view.Fragment.ListSongFragment
 import com.example.androidkaraokeapp.view.Fragment.UserFragment
 import kotlinx.android.synthetic.main.activity_main.*
-import android.R.attr.fragment
-
 
 
 class MainActivity : AppCompatActivity() {
@@ -18,9 +17,9 @@ class MainActivity : AppCompatActivity() {
 
     private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         val fragment: Fragment =  when (item.itemId) {
-            R.id.navigation_home -> ListSongFragment()
-            R.id.navigation_dashboard -> Fragment()
-            R.id.navigation_notifications -> UserFragment()
+            R.id.navigation_song -> ListSongFragment()
+            R.id.navigation_favorite -> FavoriteSongFragment()
+            R.id.navigation_user -> UserFragment()
             else -> ListSongFragment()
         }
 
@@ -37,6 +36,13 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         supportFragmentManager.beginTransaction().replace(R.id.fragment_container, ListSongFragment()).commit()
 
+        configureSaveMemory()
+
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
+    }
+
+    private fun configureSaveMemory() {
+        val folderName = HandleMemoryStorage.getInstance().faveSongFolderName
+        HandleMemoryStorage.getInstance().createFolder(folderName,this.applicationContext)
     }
 }
