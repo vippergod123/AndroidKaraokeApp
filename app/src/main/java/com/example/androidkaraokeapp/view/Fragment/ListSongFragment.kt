@@ -14,7 +14,7 @@ import com.example.androidkaraokeapp.R
 import com.example.androidkaraokeapp.model.SongModel
 import com.example.androidkaraokeapp.presenter.ListSongContract
 import com.example.androidkaraokeapp.presenter.ListSongPresenter
-import com.example.androidkaraokeapp.view.Fragment.ListSongRecyclerView.ListSongRecyclerViewAdapter
+import com.example.androidkaraokeapp.view.RecyclerView.ListSongRecyclerView.ListSongRecyclerViewAdapter
 import com.example.androidkaraokeapp.view.SearchActivity
 
 
@@ -52,7 +52,7 @@ class ListSongFragment : Fragment(), ListSongContract.View  {
         super.onActivityCreated(savedInstanceState)
         view?.let {
             configureUI(it)
-            setupPresenter()
+            setupUtility()
             listSongPresenter.fetchListSongFromFirestore(listSong)
         }
     }
@@ -72,7 +72,9 @@ class ListSongFragment : Fragment(), ListSongContract.View  {
         }
     }
 
-    private fun setupPresenter() {
+    private fun setupUtility() {
         listSongPresenter.setView(this)
     }
+
+
 }

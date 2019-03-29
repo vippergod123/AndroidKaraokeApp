@@ -15,7 +15,8 @@ class FirestoreUlti {
 
         private var instance: FirestoreUlti? = null
 
-        const val INTENT_LIST_SONG = "list_song"
+        const val Collection_SONG = "Song"
+        const val Collection_Favorite_Song= "FavoriteSong"
         const val LIST_DETAIL_REQUEST_CODE = 123
 
         fun getInstance() = instance ?: synchronized(this) {

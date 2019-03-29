@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content" android:orientation="vertical"
+              android:background="@color/gray">
+
+
+    <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        <ImageView
+                android:layout_width="match_parent"
+                android:layout_gravity="center"
+                android:layout_height="180dp" app:srcCompat="@drawable/ic_launcher_background"
+                android:id="@+id/record_image_view" android:scaleType="fitXY"/>
+        <android.support.constraint.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_gravity="bottom"
+                android:layout_height="80dp" android:background="@android:drawable/screen_background_dark_transparent">
+
+            <TextView
+                    android:text="Chạm khẽ tym anh 1 chút hoy"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:id="@+id/record_song_name_text_view"
+                    android:layout_gravity="center|bottom"
+                    android:textAlignment="viewStart" android:textColor="@android:color/white"
+                    android:alpha="1"
+                    android:layout_marginTop="14dp"
+                    app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent"
+                    android:layout_marginStart="20dp" android:fontFamily="sans-serif-medium"/>
+            <TextView
+                    android:text="User: Duy Truong"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/record_user_name_text_view"
+                    android:fontFamily="sans-serif" android:textColor="@android:color/white"
+                    app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="20dp"
+                    app:layout_constraintTop_toBottomOf="@+id/record_song_name_text_view"
+                    android:layout_marginTop="14dp" android:textAlignment="viewStart"/>
+            <TextView
+                    android:text="Time: 99:99"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/record_duration_text_view" android:layout_marginEnd="20dp"
+                    app:layout_constraintEnd_toEndOf="parent" app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_marginBottom="14dp" android:textColor="@android:color/white"
+                    android:textAlignment="textEnd"/>
+        </android.support.constraint.ConstraintLayout>
+
+    </FrameLayout>
+    <Button
+            android:text="Xóa"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:id="@+id/record_delete_button"
+            android:background="@color/light_orange" android:fontFamily="sans-serif-medium" android:textSize="16sp"
+            android:textAlignment="center" android:textColor="@android:color/white"/>
+</LinearLayout>

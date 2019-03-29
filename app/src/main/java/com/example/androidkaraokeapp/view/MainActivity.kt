@@ -43,6 +43,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun configureSaveMemory() {
         val folderName = HandleMemoryStorage.getInstance().faveSongFolderName
-        HandleMemoryStorage.getInstance().createFolder(folderName,this.applicationContext)
+//        HandleMemoryStorage.getInstance().createFolder(folderName,this.applicationContext)
     }
 }

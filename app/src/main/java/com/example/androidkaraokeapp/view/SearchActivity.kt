@@ -13,7 +13,7 @@ import com.example.androidkaraokeapp.model.SongModel
 import com.example.androidkaraokeapp.presenter.ListSongContract
 import com.example.androidkaraokeapp.presenter.ListSongPresenter
 import com.example.androidkaraokeapp.ulti.HandleString
-import com.example.androidkaraokeapp.view.Fragment.ListSongRecyclerView.ListSongRecyclerViewAdapter
+import com.example.androidkaraokeapp.view.RecyclerView.ListSongRecyclerView.ListSongRecyclerViewAdapter
 
 class SearchActivity : AppCompatActivity(), ListSongContract.View {
 

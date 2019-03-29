@@ -14,7 +14,9 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
             tools:ignore="GoogleAppIndexingWarning">
+
         <activity android:name=".view.PrepareSongActivity"
+                  android:theme="@style/AppTheme.NoActionBar"
                   android:parentActivityName=".view.MainActivity">
         </activity>
 
