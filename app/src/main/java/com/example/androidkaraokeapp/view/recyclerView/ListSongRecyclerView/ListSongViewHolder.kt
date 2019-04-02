@@ -1,5 +1,6 @@
 package com.example.androidkaraokeapp.view.recyclerView.ListSongRecyclerView
 
+import android.content.Intent
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.widget.ImageButton
@@ -15,6 +16,9 @@ import android.util.Log
 import com.example.androidkaraokeapp.ulti.FirestoreUlti
 import com.example.androidkaraokeapp.ulti.Handle_UI
 import com.example.androidkaraokeapp.view.MainActivity
+import android.os.Bundle
+
+
 
 
 class ListSongViewHolder(itemView: View?) : RecyclerView.ViewHolder(itemView!!), ListSongDialogFragment.ListSongDialogFragmentListener{
@@ -28,59 +32,6 @@ class ListSongViewHolder(itemView: View?) : RecyclerView.ViewHolder(itemView!!),
 
     private lateinit var song:SongModel
 
-    fun bind (song: SongModel) {
-        songNameTextView.text = song.name
-        songSingerTextView.text = song.singer
-
-        Picasso.get().load(song.thumbnail_url).transform(RoundedTransformation(20f,0f))
-            .into(songThumbnailImageView)
-
-        itemView.setOnClickListener {
-//            val intent = Intent(it.context, PrepareSongActivity::class.java)
-//            intent.putExtra("song", song.toString())
-            val intent = PrepareSongActivity.newIntent(it.context.applicationContext, song)
-            it.context.startActivity(intent)
-        }
-
-    }
-
-    fun setupFavoriteImageButton(inputSong: SongModel){
-        favoriteSongImageButton.setOnClickListener { it ->
-//            //            val folderName = HandleMemoryStorage.getInstance().faveSongFolderName
-////            HandleMemoryStorage.getInstance().saveFaveSongIntoFolder_InternalStorage(song, folderName,it.context)
-////            val db = FirestoreUlti.getInstance().db
-////            val favSongCollection = FirestoreUlti.Collection_Favorite_Song
-////            val songCollection = FirestoreUlti.Collection_SONG
-////            val context = it.context
-////            db.collection(songCollection).get()
-////                .addOnSuccessListener { result ->
-////                    val temp:MutableList<SongModel> = mutableListOf()
-////                    for (document in result) {
-////                        val song = document.toObject(SongModel::class.java )
-////                        temp.add(song)
-////                    }
-////
-////                }
-////            db.collection(favSongCollection).add(song)
-////                .addOnSuccessListener { Log.d("Add firestore", "DocumentSnapshot successfully written!") }
-////                .addOnFailureListener { e -> Log.w("Add firestore", "Error writing document", e) }
-//            song = inputSong
-            song = inputSong
-            Log.d("dialog", song.name)
-            dialog = ListSongDialogFragment.getInstance(this)
-            val fragmentManager = (itemView.context as MainActivity).supportFragmentManager
-
-            val ft = fragmentManager.beginTransaction()
-            val prevFragment = fragmentManager.findFragmentByTag("dialog")
-            if (prevFragment != null) {
-                ft.remove(prevFragment)
-            }
-            ft.addToBackStack(null)
-            dialog.show(ft,"dialog")
-
-        }
-    }
-
     override fun sendBackRequestCode(code: String) {
         when(code) {
             ListSongDialogFragment.REQUEST_CODE_DOWNLOAD_SONG -> {
@@ -92,6 +43,31 @@ class ListSongViewHolder(itemView: View?) : RecyclerView.ViewHolder(itemView!!),
         }
     }
 
+
+    //region public method
+    fun bind (song: SongModel) {
+        songNameTextView.text = song.name
+        songSingerTextView.text = song.singer
+
+        Picasso.get().load(song.thumbnail_url).transform(RoundedTransformation(20f,0f))
+            .into(songThumbnailImageView)
+
+        itemView.setOnClickListener {
+            val intent = PrepareSongActivity.newIntent(it.context.applicationContext, song)
+            it.context.startActivity(intent)
+        }
+
+    }
+
+    fun setupFavoriteImageButton(inputSong: SongModel){
+        favoriteSongImageButton.setOnClickListener { it ->
+            song = inputSong
+            showDialog()
+        }
+    }
+    //endregion
+
+    //region private method
     private fun addSongToFavorite(song:SongModel) {
         Log.d("dialog add", song.name)
         val db = FirestoreUlti.getInstance().db
@@ -118,4 +94,17 @@ class ListSongViewHolder(itemView: View?) : RecyclerView.ViewHolder(itemView!!),
 
     }
 
+    private fun showDialog() {
+        dialog = ListSongDialogFragment.getInstance(this)
+        val fragmentManager = (itemView.context as MainActivity).supportFragmentManager
+
+        val ft = fragmentManager.beginTransaction()
+        val prevFragment = fragmentManager.findFragmentByTag("dialog")
+        if (prevFragment != null) {
+            ft.remove(prevFragment)
+        }
+        ft.addToBackStack(null)
+        dialog.show(ft,"dialog")
+    }
+    //endregion
 }

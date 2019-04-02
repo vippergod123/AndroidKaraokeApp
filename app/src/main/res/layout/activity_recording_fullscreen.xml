@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:background="#e15215"
+             tools:context=".view.RecordingFullscreenActivity" android:id="@+id/fullscreen_content">
+
+    <!-- The primary full-screen view. This can be replaced with whatever view
+         is needed to present your content, e.g. VideoView, SurfaceView,
+         TextureView, etc. -->
+    <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" android:id="@+id/fullscreen_content_controls">
+
+        <android.support.constraint.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="60dp" android:background="@android:drawable/screen_background_light_transparent">
+
+            <ImageButton
+                    app:srcCompat="@drawable/ic_left_arrow_36dp"
+                    android:layout_width="0dp"
+                    android:layout_height="36dp" android:id="@+id/back_image_button" android:background="@null"
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:layout_marginStart="24dp" android:layout_marginBottom="8dp"
+                    app:layout_constraintBottom_toBottomOf="parent" android:layout_marginTop="8dp"
+                    app:layout_constraintTop_toTopOf="parent" app:layout_constraintDimensionRatio="w,1:1"/>
+            <TextView
+                    android:text="Chạm khẽ tym anh 1 chút hoy"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+
+                    android:id="@+id/name_song_text_view" android:layout_marginTop="8dp"
+                    app:layout_constraintTop_toTopOf="parent" android:layout_marginBottom="8dp"
+                    android:paddingEnd="60dp"
+                    android:paddingStart="0dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_marginEnd="8dp" app:layout_constraintStart_toEndOf="@+id/back_image_button"
+                    android:layout_marginStart="8dp" android:textSize="20sp" android:textAlignment="center"
+                    android:textColor="@android:color/white" android:fontFamily="sans-serif-medium"/>
+        </android.support.constraint.ConstraintLayout>
+        <android.support.constraint.ConstraintLayout
+                android:layout_gravity="bottom"
+                android:layout_width="match_parent"
+                android:layout_height="60dp" android:background="@android:drawable/screen_background_light_transparent">
+
+            <TextView
+                    android:text="99:99"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/current_text_view" app:layout_constraintStart_toStartOf="parent"
+                    android:layout_marginStart="60dp" android:layout_marginTop="8dp"
+                    app:layout_constraintTop_toTopOf="parent" android:layout_marginBottom="8dp"
+                    app:layout_constraintBottom_toBottomOf="parent" android:fontFamily="sans-serif-medium"
+                    android:textColor="@android:color/white"/>
+            <SeekBar
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/duration_seek_bar"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintTop_toTopOf="parent" android:layout_marginBottom="8dp"
+                    app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toEndOf="@+id/current_text_view"
+                    android:layout_marginStart="8dp" app:layout_constraintEnd_toStartOf="@+id/duration_text_view"
+                    android:layout_marginEnd="8dp" app:layout_constraintHorizontal_bias="0.527"
+                    style="@style/Widget.AppCompat.SeekBar"/>
+            <TextView
+                    android:text="99:99"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/duration_text_view" android:layout_marginTop="8dp"
+                    app:layout_constraintTop_toTopOf="parent" android:layout_marginBottom="8dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/mic_image_button"
+                    android:layout_marginEnd="24dp" android:textColor="@android:color/white"
+                    android:fontFamily="sans-serif-medium"/>
+            <ImageButton
+                    app:srcCompat="@drawable/ic_mic_48dp"
+                    android:layout_width="0dp"
+                    android:layout_height="36dp"
+                    android:id="@+id/mic_image_button" android:layout_marginTop="8dp"
+                    app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_marginBottom="8dp" app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_marginEnd="24dp" android:background="@null"
+                    app:layout_constraintDimensionRatio="w,1:1"/>
+        </android.support.constraint.ConstraintLayout>
+        <ImageButton
+                app:srcCompat="@drawable/ic_play_arrow_black_36dp"
+                android:layout_gravity="center"
+                android:layout_width="67dp"
+                android:layout_height="53dp" android:id="@+id/play_image_button" android:background="@null"/>
+    </FrameLayout>
+
+    <!-- This FrameLayout insets its children based on system windows using
+         android:fitsSystemWindows. -->
+
+</FrameLayout>

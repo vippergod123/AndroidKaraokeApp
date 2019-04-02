@@ -19,7 +19,7 @@ class ListSongRecyclerViewAdapter(private var listSong:MutableList<SongModel>) :
     private var isVisibleFavoriteSongImageButton = true
 
 
-    //#region override
+    //#region override recyclerView
     override fun onCreateViewHolder(parent: ViewGroup, position: Int): ListSongViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.list_song_view_holder,parent,false)
         return ListSongViewHolder(view)
@@ -47,16 +47,15 @@ class ListSongRecyclerViewAdapter(private var listSong:MutableList<SongModel>) :
     //#endregion
 
     //#region item touch helper
+
     override fun onItemMove(recyclerView: RecyclerView, fromPosition: Int, toPosition: Int): Boolean {
         if (fromPosition < toPosition) {
             for (i in fromPosition until toPosition)
                 Collections.swap(listSong, i, i+1)
-
         }
         else {
-            for ( i in fromPosition downTo toPosition + 1) {
+            for ( i in fromPosition downTo toPosition + 1)
                 Collections.swap(listSong, i, i - 1)
-            }
         }
         notifyItemMoved(fromPosition,toPosition)
         return true
@@ -66,9 +65,11 @@ class ListSongRecyclerViewAdapter(private var listSong:MutableList<SongModel>) :
         listSong.removeAt(position)
         notifyItemRemoved(position)
     }
+
     //#endregion
 
     //#region private Method
+
     private fun setAnimation(viewToAnimate: View, position: Int) {
         if (position > lastPosition) {
             val animation = AnimationUtils.loadAnimation(viewToAnimate.context, android.R.anim.slide_in_left)
@@ -76,6 +77,7 @@ class ListSongRecyclerViewAdapter(private var listSong:MutableList<SongModel>) :
             lastPosition = position
         }
     }
+
     //endregion
 
     //#region public Method

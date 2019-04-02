@@ -9,11 +9,11 @@
 
     <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="200dp">
+            android:layout_height="200dp" android:id="@+id/song_detail_frame_layout">
         <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" app:srcCompat="@color/colorAccent"
-                android:id="@+id/imageView"/>
+                android:id="@+id/thumbnail_image_view"/>
         <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_gravity="bottom"
@@ -30,10 +30,10 @@
                     app:layout_constraintTop_toTopOf="parent" android:layout_marginStart="20dp"
                     app:layout_constraintStart_toStartOf="parent"/>
             <TextView
-                    android:text="User: Duy Truong"
+                    android:text="Singer:: Duy Truong"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/user_sing_text_view"
+                    android:id="@+id/singer_text_view"
                     android:textColor="@android:color/white"
                     app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="20dp"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body1"
@@ -43,11 +43,17 @@
                     android:text="Thời gian: 99:99"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/textView4"
+                    android:id="@+id/song_duration_text_view"
                     app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="16dp"
                     app:layout_constraintBottom_toBottomOf="parent" android:layout_marginBottom="14dp"
                     android:textColor="@android:color/white" android:textAlignment="textEnd"/>
         </android.support.constraint.ConstraintLayout>
+        <ImageView
+                android:layout_gravity="center"
+                android:layout_marginBottom="36dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" app:srcCompat="@drawable/ic_play_arrow_black_36dp"
+                android:id="@+id/imageView4"/>
     </FrameLayout>
     <FrameLayout
             android:layout_width="match_parent"
