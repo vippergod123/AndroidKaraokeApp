@@ -9,7 +9,7 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import com.example.androidkaraokeapp.R
 import com.example.androidkaraokeapp.model.SongModel
-import com.example.androidkaraokeapp.view.RecyclerView.ListShortRecordRecyclerView.ListShortRecordRecyclerViewAdapter
+import com.example.androidkaraokeapp.view.recyclerView.ListShortRecordRecyclerView.ListShortRecordRecyclerViewAdapter
 
 @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
 class PrepareSongActivity : AppCompatActivity() {

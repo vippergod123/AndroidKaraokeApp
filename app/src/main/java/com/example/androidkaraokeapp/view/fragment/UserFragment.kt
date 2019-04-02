@@ -1,4 +1,4 @@
-package com.example.androidkaraokeapp.view.Fragment
+package com.example.androidkaraokeapp.view.fragment
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -10,7 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.example.androidkaraokeapp.R
-import com.example.androidkaraokeapp.view.RecyclerView.ListRecordRecyclerView.ListRecordRecyclerViewAdapter
+import com.example.androidkaraokeapp.view.recyclerView.ListRecordRecyclerView.ListRecordRecyclerViewAdapter
 
 class UserFragment: Fragment() {
     private lateinit var listRecordRecyclerView: RecyclerView
@@ -33,8 +33,6 @@ class UserFragment: Fragment() {
         super.onActivityCreated(savedInstanceState)
 //        viewModel = ViewModelProviders.of(this).get(ListSongViewModel::class.java)
         view?.let{
-
-
             configureUI(it)
         }
     }

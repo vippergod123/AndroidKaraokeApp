@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              tools:context=".view.MainActivity"
+              android:layout_height="wrap_content" android:orientation="vertical">
+    <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp" android:id="@+id/add_to_favorite_button">
+
+        <ImageView
+                android:layout_width="0dp"
+                android:layout_height="24dp" app:srcCompat="@drawable/ic_heart_black_24dp"
+                android:id="@+id/imageView7"
+                app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="24dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintDimensionRatio="w,1:1"/>
+        <TextView
+                android:text="Thêm vào yêu thích"
+                android:layout_width="339dp"
+                android:layout_height="match_parent"
+                android:gravity="center|start"
+                android:textSize="16sp"
+                android:fontFamily="sans-serif" android:textColor="@android:color/black"
+                app:layout_constraintStart_toEndOf="@+id/imageView7" android:layout_marginStart="12dp"/>
+    </android.support.constraint.ConstraintLayout>
+    <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp" android:id="@+id/download_button">
+
+        <ImageView
+                android:layout_width="24dp"
+                android:layout_height="0dp" app:srcCompat="@drawable/ic_download_black_24dp"
+                android:id="@+id/imageView5" android:layout_marginTop="8dp"
+                app:layout_constraintTop_toTopOf="parent" android:layout_marginBottom="8dp"
+                app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginStart="24dp" app:layout_constraintDimensionRatio="h,1:1"/>
+        <TextView
+                android:text="Tải về máy"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:gravity="center|start"
+                android:textSize="16sp"
+                android:textColor="@android:color/black"
+                app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toEndOf="@+id/imageView5"
+                android:layout_marginStart="12dp"/>
+    </android.support.constraint.ConstraintLayout>
+</LinearLayout>

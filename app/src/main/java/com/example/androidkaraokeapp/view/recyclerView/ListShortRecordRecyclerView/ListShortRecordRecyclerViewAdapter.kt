@@ -1,4 +1,4 @@
-package com.example.androidkaraokeapp.view.RecyclerView.ListShortRecordRecyclerView
+package com.example.androidkaraokeapp.view.recyclerView.ListShortRecordRecyclerView
 
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater

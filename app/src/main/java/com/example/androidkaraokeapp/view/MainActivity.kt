@@ -6,14 +6,13 @@ import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
 import com.example.androidkaraokeapp.R
 import com.example.androidkaraokeapp.ulti.HandleMemoryStorage
-import com.example.androidkaraokeapp.view.Fragment.FavoriteSongFragment
-import com.example.androidkaraokeapp.view.Fragment.ListSongFragment
-import com.example.androidkaraokeapp.view.Fragment.UserFragment
+import com.example.androidkaraokeapp.view.fragment.FavoriteSongFragment
+import com.example.androidkaraokeapp.view.fragment.ListSongFragment
+import com.example.androidkaraokeapp.view.fragment.UserFragment
 import kotlinx.android.synthetic.main.activity_main.*
 
 
 class MainActivity : AppCompatActivity() {
-
 
     private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         val fragment: Fragment =  when (item.itemId) {
@@ -22,12 +21,10 @@ class MainActivity : AppCompatActivity() {
             R.id.navigation_user -> UserFragment()
             else -> ListSongFragment()
         }
-
         val ft = supportFragmentManager.beginTransaction()
         ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
         ft.replace(R.id.fragment_container, fragment)
         ft.commit()
-
         return@OnNavigationItemSelectedListener true
     }
 

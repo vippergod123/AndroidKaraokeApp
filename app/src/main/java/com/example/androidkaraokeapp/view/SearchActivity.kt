@@ -13,7 +13,7 @@ import com.example.androidkaraokeapp.model.SongModel
 import com.example.androidkaraokeapp.presenter.ListSongContract
 import com.example.androidkaraokeapp.presenter.ListSongPresenter
 import com.example.androidkaraokeapp.ulti.HandleString
-import com.example.androidkaraokeapp.view.RecyclerView.ListSongRecyclerView.ListSongRecyclerViewAdapter
+import com.example.androidkaraokeapp.view.recyclerView.ListSongRecyclerView.ListSongRecyclerViewAdapter
 
 class SearchActivity : AppCompatActivity(), ListSongContract.View {
 
@@ -72,9 +72,7 @@ class SearchActivity : AppCompatActivity(), ListSongContract.View {
             filterListSong(searchString)
         }
 
-
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-
             override fun onQueryTextChange(input: String): Boolean {
                 filterListSong(input)
                 return false
@@ -93,7 +91,6 @@ class SearchActivity : AppCompatActivity(), ListSongContract.View {
 
     private fun filterListSong(input:String) {
         searchString = input
-
         val filteredMap: List<SongModel> = when (songFilterTypeString) {
             "name" -> listSong.filter {
                 val nameSong = HandleString().removeVietnameseUnicodeSymbol(it.name)

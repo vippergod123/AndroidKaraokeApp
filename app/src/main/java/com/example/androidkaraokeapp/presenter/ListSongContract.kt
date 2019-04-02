@@ -9,6 +9,8 @@ interface ListSongContract {
         fun fetchListSongFromFirestore(listSong: MutableList<SongModel>)
         fun fetchFavoriteSongFromFirestore(listSong: MutableList<SongModel>)
 
+        fun addToFavorite ( song: SongModel)
+        fun downloadSongToMemory (song: SongModel)
     }
 
     interface View {

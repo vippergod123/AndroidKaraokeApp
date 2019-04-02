@@ -1,4 +1,4 @@
-package com.example.androidkaraokeapp.view.RecyclerView.SearchRecyclerView
+package com.example.androidkaraokeapp.view.recyclerView.SearchRecyclerView
 
 import android.support.v7.widget.RecyclerView
 import android.view.ViewGroup
