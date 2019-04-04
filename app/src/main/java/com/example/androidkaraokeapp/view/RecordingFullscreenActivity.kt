@@ -1,10 +1,14 @@
 package com.example.androidkaraokeapp.view
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.media.MediaPlayer
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageButton
@@ -12,6 +16,7 @@ import android.widget.SeekBar
 import android.widget.TextView
 import com.example.androidkaraokeapp.R
 import com.example.androidkaraokeapp.model.SongModel
+import com.example.androidkaraokeapp.ulti.HandleDateTime
 import kotlinx.android.synthetic.main.activity_recording_fullscreen.*
 
 /**
@@ -30,9 +35,15 @@ class RecordingFullscreenActivity : AppCompatActivity() {
 
     private lateinit var fullScreenContent: FrameLayout
     private lateinit var fullScreenContentControl: FrameLayout
+
     private var song: SongModel = SongModel()
 
+    private var mediaPlayer = MediaPlayer()
+    private var isPlaying: Boolean = false
+    private var currentPlayPosition:Int = -1
+
     private val mHideHandler = Handler()
+
     private val mHidePart2Runnable = Runnable {
         // Delayed removal of status and navigation bar
 
@@ -49,7 +60,7 @@ class RecordingFullscreenActivity : AppCompatActivity() {
     }
     private val mShowPart2Runnable = Runnable {
         // Delayed display of UI elements
-        supportActionBar?.show()
+//        supportActionBar?.show()
         fullScreenContentControl.visibility = View.VISIBLE
     }
     private var mVisible: Boolean = false
@@ -66,13 +77,18 @@ class RecordingFullscreenActivity : AppCompatActivity() {
          * If [AUTO_HIDE] is set, the number of milliseconds to wait after
          * user interaction before hiding the system UI.
          */
-        private val AUTO_HIDE_DELAY_MILLIS = 3000
+        private const val AUTO_HIDE_DELAY_MILLIS = 3000
 
         /**
          * Some older devices needs a small delay between UI widget updates
          * and a change of the status and navigation bar.
          */
-        private val UI_ANIMATION_DELAY = 300
+        private const val UI_ANIMATION_DELAY = 300
+
+
+
+
+
 
 
         const val BUNDLE_RECORDING_SONG = "bundle_recording_song"
@@ -87,6 +103,7 @@ class RecordingFullscreenActivity : AppCompatActivity() {
         }
     }
 
+    //region override
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_recording_fullscreen)
@@ -112,8 +129,9 @@ class RecordingFullscreenActivity : AppCompatActivity() {
         // Trigger the initial hide() shortly after the activity has been
         // created, to briefly hint to the user that UI controls
         // are available.
-        delayedHide(100)
+        show()
     }
+    //endregion
 
     //region private method
     private fun toggle() {
@@ -122,11 +140,12 @@ class RecordingFullscreenActivity : AppCompatActivity() {
         } else {
             show()
         }
+
     }
 
     private fun hide() {
         // Hide UI first
-        fullScreenContentControl.visibility = View.GONE
+        fullScreenContentControl.visibility = View.INVISIBLE
         mVisible = false
 
         // Schedule a runnable to remove the status and navigation bar after a delay
@@ -136,9 +155,9 @@ class RecordingFullscreenActivity : AppCompatActivity() {
 
     private fun show() {
         // Show the system bar
-        fullScreenContent.systemUiVisibility =
-            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
-                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+        fullScreenContent.systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or View.SYSTEM_UI_FLAG_FULLSCREEN
+//            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+//                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
         mVisible = true
 
         // Schedule a runnable to display UI elements after a delay
@@ -178,14 +197,71 @@ class RecordingFullscreenActivity : AppCompatActivity() {
 
         fullScreenContent = findViewById(R.id.fullscreen_content)
         fullScreenContentControl = findViewById(R.id.fullscreen_content_controls)
+
         nameSongTextView.text = song.name
+
+        mediaPlayer.reset()
+        mediaPlayer.setDataSource(song.mp3_url)
+        mediaPlayer.prepare()
+        durationSeekBar.max = mediaPlayer.duration
+        isPlaying = mediaPlayer.isPlaying
+        currentPlayPosition = mediaPlayer.currentPosition
+
+
+        val duration = HandleDateTime.miliSecondToTime( mediaPlayer.duration)
+        durationTextView.text = duration
 
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun setupListener(){
         backImageButton.setOnClickListener {
+
             finish()
         }
+
+        playImageButton.setOnClickListener {
+            when (isPlaying) {
+                true -> {
+                    // media playing ->  stop, play icon
+                    playImageButton.setImageResource(R.drawable.ic_play_arrow_black_36dp)
+                    currentPlayPosition = mediaPlayer.currentPosition
+                    mediaPlayer.pause()
+                }
+
+                false -> {
+                    // media stop ->  play, pause icon
+                    playImageButton.setImageResource(R.drawable.ic_pause_black_36dp)
+                    mediaPlayer.seekTo(currentPlayPosition)
+                    mediaPlayer.start()
+                    startTrackingPositionMedia()
+                }
+            }
+            isPlaying = !isPlaying
+
+            delayedHide(AUTO_HIDE_DELAY_MILLIS)
+        }
+
+        durationSeekBar.setOnTouchListener { v, event -> true }
+    }
+
+    private fun startTrackingPositionMedia() {
+        Thread(Runnable {
+                do {
+
+                    currentTextView.post {
+                        Log.d("thread media", mediaPlayer.currentPosition.toString())
+                        durationSeekBar.progress = mediaPlayer.currentPosition
+                        currentPlayPosition =  mediaPlayer.currentPosition
+                        currentTextView.text = HandleDateTime.miliSecondToTime(currentPlayPosition)
+                    }
+                    try {
+                        Thread.sleep(500)
+                    } catch (e: InterruptedException) {
+                        e.printStackTrace()
+                    }
+                } while (mediaPlayer.isPlaying)
+        }).start()
     }
     //endregion
 
