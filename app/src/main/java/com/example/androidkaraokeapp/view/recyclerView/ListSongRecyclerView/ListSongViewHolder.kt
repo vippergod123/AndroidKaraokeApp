@@ -1,5 +1,6 @@
 package com.example.androidkaraokeapp.view.recyclerView.ListSongRecyclerView
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.support.v7.widget.RecyclerView
 import android.view.View
@@ -25,6 +26,7 @@ class ListSongViewHolder(itemView: View?) : RecyclerView.ViewHolder(itemView!!),
 
     private val songNameTextView = itemView?.findViewById(R.id.song_name_text_view) as TextView
     private val songSingerTextView = itemView?.findViewById(R.id.song_singer_text_view) as TextView
+    private val songIdTextView = itemView?.findViewById(R.id.song_id_text_view) as TextView
     private val favoriteSongImageButton = itemView?.findViewById(R.id.favorite_song_image_button) as ImageButton
     private val songThumbnailImageView = itemView?.findViewById<ImageView>(R.id.song_thumbnail_image_view)
 
@@ -45,9 +47,11 @@ class ListSongViewHolder(itemView: View?) : RecyclerView.ViewHolder(itemView!!),
 
 
     //region public method
+    @SuppressLint("SetTextI18n")
     fun bind (song: SongModel) {
         songNameTextView.text = song.name
         songSingerTextView.text = song.singer
+        songIdTextView.text = "Mã số: ${song.id}"
 
         Picasso.get().load(song.thumbnail_url).transform(RoundedTransformation(20f,0f))
             .into(songThumbnailImageView)
@@ -78,7 +82,7 @@ class ListSongViewHolder(itemView: View?) : RecyclerView.ViewHolder(itemView!!),
                 Handle_UI().toastWithDuration("Bài hát đã được lưu", 1, itemView.context)
             }
             else {
-                favSongCollection.add(song).addOnSuccessListener { documentReference ->
+                favSongCollection.document(song.id.toString()).set(song).addOnSuccessListener { documentReference ->
                                                                     Handle_UI().toastWithDuration("Lưu thành công", 1, itemView.context)
                                                                 }
                                                             .addOnFailureListener { e ->

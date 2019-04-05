@@ -23,14 +23,19 @@
         <LinearLayout
                 android:orientation="vertical"
                 android:layout_width="match_parent"
+                android:layout_marginTop="5dp"
                 android:layout_height="match_parent" android:layout_weight="1">
             <TextView
                     android:text="TextView"
+                    android:ellipsize="end"
+                    android:maxLines="2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" android:id="@+id/song_name_text_view" android:layout_weight="1"
-                    android:textSize="16sp" android:textStyle="bold"/>
+                    android:textSize="20sp" android:textStyle="bold"/>
             <TextView
                     android:text="TextView"
+                    android:ellipsize="end"
+                    android:singleLine="true"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" android:id="@+id/song_singer_text_view"
                     android:layout_weight="1"
@@ -41,7 +46,7 @@
             <TextView
                     android:text="Số lần thu: 10"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" android:id="@+id/song_count_record_text_view"
+                    android:layout_height="wrap_content" android:id="@+id/song_id_text_view"
                     android:layout_weight="1" android:textSize="12sp"/>
         </LinearLayout>
         <ImageButton

@@ -4,7 +4,7 @@
              android:layout_width="match_parent"
              android:layout_height="match_parent"
              android:background="#e15215"
-             tools:context=".view.RecordingFullscreenActivity" android:id="@+id/fullscreen_content">
+             tools:context=".view.KaraokeScreenActivity" android:id="@+id/fullscreen_content">
 
     <!-- The primary full-screen view. This can be replaced with whatever view
          is needed to present your content, e.g. VideoView, SurfaceView,
@@ -43,10 +43,12 @@
         <android.support.constraint.ConstraintLayout
                 android:layout_gravity="bottom"
                 android:layout_width="match_parent"
-                android:layout_height="50dp" android:background="@android:drawable/screen_background_light_transparent">
+                android:layout_height="50dp"
+                android:background="@android:drawable/screen_background_light_transparent"
+        >
 
             <TextView
-                    android:text="99:99"
+                    android:text="00:00"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/current_text_view" app:layout_constraintStart_toStartOf="parent"

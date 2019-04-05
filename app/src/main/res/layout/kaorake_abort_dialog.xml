@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:background="@drawable/rounded_corner_20dp"
+              android:orientation="vertical">
+    <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="180dp">
+
+        <TextView
+                android:text="Vẫn đang thu âm\nBạn chắc chắn muốn thoát khỏi trình thu?"
+                android:gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" android:id="@+id/textView" android:textSize="18sp"
+                android:textAlignment="center" android:fontFamily="sans-serif-medium"
+                android:textColor="@android:color/background_dark"
+                tools:layout_editor_absoluteY="24dp" tools:layout_editor_absoluteX="24dp"/>
+    </FrameLayout>
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+
+            android:layout_height="60dp">
+        <Button
+                android:text="Thoát"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" android:id="@+id/karaoke_abort_button"
+                android:background="@color/light_red" android:textColor="@android:color/white" android:textSize="14sp"/>
+        <Button
+                android:text="Tiếp tục"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" android:id="@+id/karaoke_cancel_button"
+                android:background="@color/colorPrimary" android:textColor="@android:color/white"
+                android:fontFamily="sans-serif-medium" android:textSize="14sp"/>
+    </LinearLayout>
+</LinearLayout>

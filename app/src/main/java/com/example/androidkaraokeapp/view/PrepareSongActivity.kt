@@ -15,6 +15,12 @@ import com.example.androidkaraokeapp.R
 import com.example.androidkaraokeapp.model.SongModel
 import com.example.androidkaraokeapp.view.recyclerView.ListShortRecordRecyclerView.ListShortRecordRecyclerViewAdapter
 import com.squareup.picasso.Picasso
+import android.media.MediaMetadataRetriever
+import android.os.AsyncTask
+import com.example.androidkaraokeapp.ulti.HandleDateTime
+import android.os.Build
+import android.util.AttributeSet
+import android.view.View
 
 
 @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
@@ -51,6 +57,23 @@ class PrepareSongActivity : AppCompatActivity() {
 
 
     @SuppressLint("SetTextI18n")
+
+    override fun onPostCreate(savedInstanceState: Bundle?) {
+        super.onPostCreate(savedInstanceState)
+//        listShortRecordRecyclerView.adapter =  ListShortRecordRecyclerViewAdapter(this,song!!.id)
+        songDurationTextView.text = "Thời gian: đang xử lý..."
+        val backGroundTask = CalculateDurationSong(song!!.mp3_url, callBack  = {
+            songDurationTextView.text = "Thời gian: $it"
+        })
+        backGroundTask.execute()
+
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        listShortRecordRecyclerView.adapter =  ListShortRecordRecyclerViewAdapter(this,song!!.id)
+    }
+    @SuppressLint("SetTextI18n")
     private fun configureUI () {
         listShortRecordRecyclerView = findViewById(R.id.list_short_record_recycler_view)
         songDurationTextView = findViewById(R.id.song_duration_text_view)
@@ -64,8 +87,10 @@ class PrepareSongActivity : AppCompatActivity() {
         userSingTextView.text = "Singer: ${song!!.singer}"
         Picasso.get().load(song!!.thumbnail_url).fit().into(thumbnailImageView)
 
+
+
         listShortRecordRecyclerView.layoutManager = LinearLayoutManager(this.applicationContext)
-        listShortRecordRecyclerView.adapter =  ListShortRecordRecyclerViewAdapter()
+
 
         //        Add divider to viewholder
         val dividerItemDecoration = DividerItemDecoration(this.applicationContext, LinearLayoutManager.VERTICAL)
@@ -83,8 +108,27 @@ class PrepareSongActivity : AppCompatActivity() {
 
     private fun setupListener() {
         songDetailFrameLayout.setOnClickListener {
-            val intent = RecordingFullscreenActivity.newIntent(it.context.applicationContext, song!!)
+            val intent = KaraokeScreenActivity.newIntent(it.context.applicationContext, song!!)
             startActivity(intent)
         }
+    }
+}
+
+
+private class CalculateDurationSong(private val imageURL:String, var callBack: (String) -> Unit): AsyncTask<String,Void,String>() {
+    override fun doInBackground(vararg params: String?): String {
+        val mmr = MediaMetadataRetriever()
+            if (Build.VERSION.SDK_INT >= 14)
+                mmr.setDataSource(imageURL, HashMap<String, String>())
+            else
+                mmr.setDataSource(imageURL)
+            val duration = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+//        mmr.release()
+            return HandleDateTime.miliSecondToTime(duration.toLong())
+    }
+
+    override fun onPostExecute(result: String) {
+        super.onPostExecute(result)
+        callBack(result)
     }
 }

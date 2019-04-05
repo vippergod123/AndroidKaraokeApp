@@ -1,49 +1,39 @@
 package com.example.androidkaraokeapp.view
 
 import android.annotation.SuppressLint
+import android.app.Dialog
 import android.content.Context
 import android.content.Intent
-import android.media.MediaPlayer
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
-import android.util.Log
-import android.view.MotionEvent
 import android.view.View
+import android.view.Window
+import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageButton
-import android.widget.SeekBar
 import android.widget.TextView
 import com.example.androidkaraokeapp.R
 import com.example.androidkaraokeapp.model.SongModel
-import com.example.androidkaraokeapp.ulti.HandleDateTime
+import com.example.androidkaraokeapp.ulti.KaraokeMediaPlayer
 import kotlinx.android.synthetic.main.activity_recording_fullscreen.*
 
-/**
- * An example full-screen activity that shows and hides the system UI (i.e.
- * status bar and navigation/system bar) with user interaction.
- */
-class RecordingFullscreenActivity : AppCompatActivity() {
+
+
+class KaraokeScreenActivity : AppCompatActivity() {
 
     private lateinit var backImageButton: ImageButton
+    private lateinit var nameSongTextView: TextView
     private lateinit var playImageButton: ImageButton
     private lateinit var micImageButton: ImageButton
-    private lateinit var nameSongTextView: TextView
-    private lateinit var currentTextView: TextView
-    private lateinit var durationTextView: TextView
-    private lateinit var durationSeekBar: SeekBar
+
 
     private lateinit var fullScreenContent: FrameLayout
     private lateinit var fullScreenContentControl: FrameLayout
 
     private var song: SongModel = SongModel()
 
-    private var mediaPlayer = MediaPlayer()
-    private var isPlaying: Boolean = false
-    private var currentPlayPosition:Int = -1
-
     private val mHideHandler = Handler()
-
     private val mHidePart2Runnable = Runnable {
         // Delayed removal of status and navigation bar
 
@@ -91,13 +81,14 @@ class RecordingFullscreenActivity : AppCompatActivity() {
 
 
 
-        const val BUNDLE_RECORDING_SONG = "bundle_recording_song"
-        const val RECORDING_SONG_REQUEST_CODE = 100
+        const val BUNDLE_KARAOKE_SONG = "bundle_recording_song"
+        const val BUNDLE_KARAOKE_MODE = "bundle_recording_song"
+
 
         fun newIntent(context: Context, song: SongModel): Intent {
-            val intent = Intent(context, RecordingFullscreenActivity::class.java)
+            val intent = Intent(context, KaraokeScreenActivity::class.java)
             val bundle = Bundle()
-            bundle.putSerializable(BUNDLE_RECORDING_SONG,song)
+            bundle.putSerializable(BUNDLE_KARAOKE_SONG,song)
             intent.putExtras(bundle)
             return intent
         }
@@ -114,26 +105,22 @@ class RecordingFullscreenActivity : AppCompatActivity() {
 
         mVisible = true
 
-        // Set up the user interaction to manually show or hide the system UI.
         fullScreenContent.setOnClickListener { toggle() }
 
-        // Upon interacting with UI controls, delay any scheduled hide()
-        // operations to prevent the jarring behavior of controls going away
-        // while interacting with the UI.
         play_image_button.setOnTouchListener(mDelayHideTouchListener)
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
         super.onPostCreate(savedInstanceState)
-
-        // Trigger the initial hide() shortly after the activity has been
-        // created, to briefly hint to the user that UI controls
-        // are available.
+        KaraokeMediaPlayer.init(findViewById(android.R.id.content),song)
+        KaraokeMediaPlayer.saveRecord()
         show()
     }
+
+
     //endregion
 
-    //region private method
+    //region private method UI
     private fun toggle() {
         if (mVisible) {
             hide()
@@ -179,89 +166,95 @@ class RecordingFullscreenActivity : AppCompatActivity() {
         mHideHandler.postDelayed(mHideRunnable, delayMillis.toLong())
     }
 
+    //endregion
+
+    //private method
+
     private fun getDataFromBundle(){
         val bundle = intent.extras
         if (bundle != null) {
-            song = bundle.getSerializable(BUNDLE_RECORDING_SONG) as SongModel
+            song = bundle.getSerializable(BUNDLE_KARAOKE_SONG) as SongModel
         }
     }
 
     private fun configureUI() {
-        micImageButton = findViewById(R.id.mic_image_button)
         backImageButton = findViewById(R.id.back_image_button)
-        playImageButton = findViewById(R.id.play_image_button)
         nameSongTextView = findViewById(R.id.name_song_text_view)
-        currentTextView = findViewById(R.id.current_text_view)
-        durationTextView = findViewById(R.id.duration_text_view)
-        durationSeekBar = findViewById(R.id.duration_seek_bar)
+        playImageButton = findViewById(R.id.play_image_button)
+        micImageButton = findViewById(R.id.mic_image_button)
 
         fullScreenContent = findViewById(R.id.fullscreen_content)
         fullScreenContentControl = findViewById(R.id.fullscreen_content_controls)
 
         nameSongTextView.text = song.name
 
-        mediaPlayer.reset()
-        mediaPlayer.setDataSource(song.mp3_url)
-        mediaPlayer.prepare()
-        durationSeekBar.max = mediaPlayer.duration
-        isPlaying = mediaPlayer.isPlaying
-        currentPlayPosition = mediaPlayer.currentPosition
-
-
-        val duration = HandleDateTime.miliSecondToTime( mediaPlayer.duration)
-        durationTextView.text = duration
-
     }
 
-    @SuppressLint("ClickableViewAccessibility")
+    @SuppressLint("ClickableViewAccessibility", "InflateParams")
     private fun setupListener(){
         backImageButton.setOnClickListener {
-
-            finish()
+            if ( KaraokeMediaPlayer.isRecording)
+                abortKaraoke()
+            else {
+                finish()
+            }
         }
 
         playImageButton.setOnClickListener {
-            when (isPlaying) {
+            when (KaraokeMediaPlayer.isPlaying) {
                 true -> {
                     // media playing ->  stop, play icon
-                    playImageButton.setImageResource(R.drawable.ic_play_arrow_black_36dp)
-                    currentPlayPosition = mediaPlayer.currentPosition
-                    mediaPlayer.pause()
+//                    KaraokeMediaPlayer.pause()
+                    KaraokeMediaPlayer.stop()
+                    finish()
                 }
 
                 false -> {
                     // media stop ->  play, pause icon
-                    playImageButton.setImageResource(R.drawable.ic_pause_black_36dp)
-                    mediaPlayer.seekTo(currentPlayPosition)
-                    mediaPlayer.start()
-                    startTrackingPositionMedia()
+                    KaraokeMediaPlayer.play()
                 }
             }
-            isPlaying = !isPlaying
-
             delayedHide(AUTO_HIDE_DELAY_MILLIS)
         }
 
-        durationSeekBar.setOnTouchListener { v, event -> true }
+        micImageButton.setOnClickListener {
+            when (KaraokeMediaPlayer.isRecording) {
+                true -> {
+                    // recording ->  stop
+                    KaraokeMediaPlayer.stop()
+                    finish()
+                }
+            }
+
+        }
     }
 
-    private fun startTrackingPositionMedia() {
-        Thread(Runnable {
-                do {
 
-                    currentTextView.post {
-                        Log.d("thread media", mediaPlayer.currentPosition.toString())
-                        durationSeekBar.progress = mediaPlayer.currentPosition
-                        currentPlayPosition =  mediaPlayer.currentPosition
-                        currentTextView.text = HandleDateTime.miliSecondToTime(currentPlayPosition)
-                    }
-                    try {
-                        Thread.sleep(500)
-                    } catch (e: InterruptedException) {
-                        e.printStackTrace()
-                    }
-                } while (mediaPlayer.isPlaying)
-        }).start()
+    private fun abortKaraoke() {
+//        val dialog = AlertDialog.Builder(this)
+//        val dialogView = LayoutInflater.from(this).inflate(R.layout.kaorake_abort_dialog,null)
+//        dialog.setView(dialogView)
+//        dialog.setCancelable(true)
+//        val abortDialog = dialog.create()
+//        abortDialog.show()
+
+        val dialog = Dialog(this)
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.setCancelable(false)
+        dialog.setContentView(R.layout.kaorake_abort_dialog)
+
+        val abortButton = dialog.findViewById(R.id.karaoke_abort_button) as Button
+        val cancleButton = dialog.findViewById(R.id.karaoke_cancel_button) as Button
+        cancleButton.setOnClickListener { dialog.dismiss() }
+        abortButton.setOnClickListener{
+            KaraokeMediaPlayer.abort()
+            finish()
+        }
+        dialog.show()
+
+
+//
+
     }
     //endregion
 

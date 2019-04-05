@@ -40,7 +40,7 @@ class UserFragment: Fragment() {
     private fun configureUI (it:View) {
         listRecordRecyclerView = it.findViewById(R.id.list_record_recycler_view)
         listRecordRecyclerView.layoutManager = LinearLayoutManager(activity)
-        listRecordRecyclerView.adapter =  ListRecordRecyclerViewAdapter()
+        listRecordRecyclerView.adapter =  ListRecordRecyclerViewAdapter(it.context.applicationContext)
 
         //        Add divider to viewholder
         val dividerItemDecoration = DividerItemDecoration(context!!, LinearLayoutManager.VERTICAL)

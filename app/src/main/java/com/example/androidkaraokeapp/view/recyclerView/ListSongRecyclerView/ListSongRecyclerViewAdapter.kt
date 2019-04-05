@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import com.example.androidkaraokeapp.R
 import com.example.androidkaraokeapp.model.SongModel
+import com.example.androidkaraokeapp.ulti.FirestoreUlti
 import com.example.androidkaraokeapp.ulti.ItemTouchHelperListener
 import com.example.androidkaraokeapp.view.dialog.ListSongDialogFragment
 import kotlinx.android.synthetic.main.list_song_view_holder.view.*
@@ -62,8 +63,18 @@ class ListSongRecyclerViewAdapter(private var listSong:MutableList<SongModel>) :
     }
 
     override fun onItemDismiss(viewHolder: RecyclerView.ViewHolder, position: Int) {
+
+        val dismissSong = listSong[position]
+        val favSongCollection = FirestoreUlti.getInstance().db.collection(FirestoreUlti.Collection_Favorite_Song)
         listSong.removeAt(position)
         notifyItemRemoved(position)
+        favSongCollection.document(dismissSong.id.toString()).delete()
+        .addOnSuccessListener {
+//            listSong.removeAt(position)
+
+        }
+        .addOnFailureListener {  }
+
     }
 
     //#endregion
