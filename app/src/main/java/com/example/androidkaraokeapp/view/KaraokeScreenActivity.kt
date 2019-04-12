@@ -7,20 +7,28 @@ import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
+import android.os.PowerManager
+import android.util.Log
 import android.view.View
 import android.view.Window
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.TextView
 import com.example.androidkaraokeapp.R
+import com.example.androidkaraokeapp.model.LyricModel
 import com.example.androidkaraokeapp.model.SongModel
+import com.example.androidkaraokeapp.ulti.HandleDateTime
 import com.example.androidkaraokeapp.ulti.KaraokeMediaPlayer
 import kotlinx.android.synthetic.main.activity_recording_fullscreen.*
-
+import okhttp3.*
+import java.io.IOException
 
 
 class KaraokeScreenActivity : AppCompatActivity() {
+
+    private var karaokeLyric: MutableList<LyricModel> = mutableListOf()
 
     private lateinit var backImageButton: ImageButton
     private lateinit var nameSongTextView: TextView
@@ -28,10 +36,15 @@ class KaraokeScreenActivity : AppCompatActivity() {
     private lateinit var micImageButton: ImageButton
 
 
+//    private lateinit var lyricTopTextView: LyricTextView
+//    private lateinit var lyricBotTextView: LyricTextView
+
     private lateinit var fullScreenContent: FrameLayout
     private lateinit var fullScreenContentControl: FrameLayout
 
+
     private var song: SongModel = SongModel()
+
 
     private val mHideHandler = Handler()
     private val mHidePart2Runnable = Runnable {
@@ -39,7 +52,7 @@ class KaraokeScreenActivity : AppCompatActivity() {
 
         // Note that some of these constants are new as of API 16 (Jelly Bean)
         // and API 19 (KitKat). It is safe to use them, as they are inlined
-        // at compile-time and do nothing on earlier devices.
+        // at compile-time and do nothing on earlier devices.s
         fullScreenContent.systemUiVisibility =
             View.SYSTEM_UI_FLAG_LOW_PROFILE or
                     View.SYSTEM_UI_FLAG_FULLSCREEN or
@@ -97,6 +110,8 @@ class KaraokeScreenActivity : AppCompatActivity() {
     //region override
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
         setContentView(R.layout.activity_recording_fullscreen)
 
         getDataFromBundle()
@@ -105,7 +120,9 @@ class KaraokeScreenActivity : AppCompatActivity() {
 
         mVisible = true
 
-        fullScreenContent.setOnClickListener { toggle() }
+        fullScreenContent.setOnClickListener {
+            toggle()
+        }
 
         play_image_button.setOnTouchListener(mDelayHideTouchListener)
     }
@@ -115,8 +132,8 @@ class KaraokeScreenActivity : AppCompatActivity() {
         KaraokeMediaPlayer.init(findViewById(android.R.id.content),song)
         KaraokeMediaPlayer.saveRecord()
         show()
-    }
 
+    }
 
     //endregion
 
@@ -168,7 +185,7 @@ class KaraokeScreenActivity : AppCompatActivity() {
 
     //endregion
 
-    //private method
+    //private methodX
 
     private fun getDataFromBundle(){
         val bundle = intent.extras
@@ -183,11 +200,89 @@ class KaraokeScreenActivity : AppCompatActivity() {
         playImageButton = findViewById(R.id.play_image_button)
         micImageButton = findViewById(R.id.mic_image_button)
 
+//        lyricTopTextView = findViewById(R.id.lyric_top_text_view)
+//        lyricBotTextView = findViewById(R.id.lyric_bot_text_view)
+
         fullScreenContent = findViewById(R.id.fullscreen_content)
         fullScreenContentControl = findViewById(R.id.fullscreen_content_controls)
 
         nameSongTextView.text = song.name
 
+
+
+
+        val request = Request.Builder().url(song.sub_url).build()
+        val client = OkHttpClient()
+
+        client.newCall(request).enqueue(object: Callback{
+            override fun onFailure(call: Call, e: IOException) {
+                Log.d("Failed", "asd")
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val  body = response.body()?.string()
+                val lyric = body!!.split("\r\n")
+                for ( i in 0 until lyric.lastIndex) {
+                    val temp = LyricModel()
+
+                    try {
+
+                        if ( lyric[i] == "") {
+                            val to = HandleDateTime.timeToMiliSeconds(
+                                lyric[i + 1].substring(
+                                    lyric[i + 1].indexOf("[") + 1,
+                                    lyric[i + 1].indexOf("]")
+                                )
+                            )
+                            karaokeLyric[karaokeLyric.lastIndex].to = to
+                            continue
+                        }
+
+                        val from = HandleDateTime.timeToMiliSeconds(
+                            lyric[i].substring(
+                                lyric[i].indexOf("[") + 1,
+                                lyric[i].indexOf("]")
+                            )
+                        )
+                        temp.from = from
+
+                        val to = HandleDateTime.timeToMiliSeconds(
+                            lyric[i + 1].substring(
+                                lyric[i + 1].indexOf("[") + 1,
+                                lyric[i + 1].indexOf("]")
+                            )
+                        )
+                        temp.to = to
+
+                        // jump when lyric mp3 zing === " "
+
+
+                        val duration = temp.to - temp.from
+                        var text = lyric[i].substring(lyric[i].indexOf("]") + 1, lyric[i].lastIndex + 1)
+
+                        if ( text == "" ) {
+                            if (duration > 4000) {
+                                text = "Nhạc dạo"
+                                temp.text = text
+                                karaokeLyric.add(temp)
+                            }
+                            else {
+                                karaokeLyric[karaokeLyric.lastIndex].to = to
+                            }
+                        }
+                        else {
+                            temp.text = text
+                            karaokeLyric.add(temp)
+                        }
+
+                    }
+                    catch(ex:Exception) {
+                        println(ex)
+                    }
+                }
+                KaraokeMediaPlayer.getKaraokeLyric(karaokeLyric)
+            }
+        })
     }
 
     @SuppressLint("ClickableViewAccessibility", "InflateParams")
@@ -231,12 +326,7 @@ class KaraokeScreenActivity : AppCompatActivity() {
 
 
     private fun abortKaraoke() {
-//        val dialog = AlertDialog.Builder(this)
-//        val dialogView = LayoutInflater.from(this).inflate(R.layout.kaorake_abort_dialog,null)
-//        dialog.setView(dialogView)
-//        dialog.setCancelable(true)
-//        val abortDialog = dialog.create()
-//        abortDialog.show()
+
 
         val dialog = Dialog(this)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)

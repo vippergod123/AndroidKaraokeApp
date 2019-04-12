@@ -3,12 +3,28 @@
              xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
-             android:background="#e15215"
+             android:background="#BA15E1DA"
+             android:keepScreenOn="true"
              tools:context=".view.KaraokeScreenActivity" android:id="@+id/fullscreen_content">
 
     <!-- The primary full-screen view. This can be replaced with whatever view
          is needed to present your content, e.g. VideoView, SurfaceView,
          TextureView, etc. -->
+    <TextView
+            android:text="awqeqwe"
+            android:layout_width="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginBottom="-100px"
+            android:layout_height="wrap_content" android:id="@+id/lyric_bot_text_view" android:textSize="27sp"
+            app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"
+            android:textColor="@android:color/white" android:fontFamily="sans-serif-medium"/>
+    <com.example.androidkaraokeapp.view.custom_view.LyricTextView
+            android:gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginBottom="100px"
+            android:layout_height="wrap_content" android:id="@+id/lyric_top_text_view" android:textSize="32sp"
+            android:textColor="@android:color/white" android:fontFamily="sans-serif-black"/>
     <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent" android:id="@+id/fullscreen_content_controls">
