@@ -21,6 +21,7 @@ import com.example.androidkaraokeapp.ulti.HandleDateTime
 import android.os.Build
 import android.util.AttributeSet
 import android.view.View
+import com.example.androidkaraokeapp.ulti.KaraokeMediaPlayer
 
 
 @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
@@ -108,7 +109,7 @@ class PrepareSongActivity : AppCompatActivity() {
 
     private fun setupListener() {
         songDetailFrameLayout.setOnClickListener {
-            val intent = KaraokeScreenActivity.newIntent(it.context.applicationContext, song!!)
+            val intent = KaraokeScreenActivity.newIntent(it.context.applicationContext, song!!, KaraokeScreenActivity.MODE_KARAOKE)
             startActivity(intent)
         }
     }

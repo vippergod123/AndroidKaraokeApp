@@ -1,17 +1,16 @@
 package com.example.androidkaraokeapp.view.custom_view
 
 import android.content.Context
-import android.support.v7.app.AppCompatActivity
-import android.os.Bundle
 import android.graphics.*
+import android.os.SystemClock
 import android.util.AttributeSet
 import android.util.Log
 import android.util.TypedValue
 import android.widget.TextView
 import java.lang.Runnable as Runnable
-import android.opengl.ETC1.getHeight
 import android.view.MotionEvent
-
+import android.widget.Chronometer
+import com.example.androidkaraokeapp.model.LyricModel
 
 class LyricTextView: TextView {
     private var mHeight = 0
@@ -23,49 +22,47 @@ class LyricTextView: TextView {
     private var duration:Float = 500F
     private var currentMilis:Float = 0F
     private var strokeWidth = 10f
-    private var framePerSecond:Long = 1000/24
+    private lateinit var chronometer: Chronometer
 
+    var framePerSecond:Long = 1000/60
     var isRunning = false
 
-    constructor(context: Context) : this(context, null) {
-//        if ( !isInit) {
-//            initView()
-//        }
-        println()
 
-    }
+    constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
-
-
     private fun initView () {
-
         fontSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,fontSize, resources.displayMetrics)
         paint.typeface = Typeface.DEFAULT_BOLD
         paint.textSize = fontSize
         paint.textAlign = Paint.Align.CENTER
         paint.strokeWidth = strokeWidth
         mHeight = height
-//        mWidth =  paint.measureText(lyric, 0, lyric.length).toInt()
         isInit = true
+        chronometer = Chronometer(context)
     }
 
+
+
+    //region override method
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        mWidth =  paint.measureText(lyric, 0, lyric.length).toInt()
-        super.onMeasure(MeasureSpec.makeMeasureSpec(paint.measureText(lyric, 0, lyric.length).toInt(),MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(150,MeasureSpec.EXACTLY))
+        super.onMeasure(MeasureSpec.makeMeasureSpec(mWidth,MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(150,MeasureSpec.EXACTLY))
     }
+
+
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-
         if ( !isInit) {
             initView()
-
         }
         drawText(canvas)
     }
+
+
+    //endregion
 
     //region private method
 
@@ -74,6 +71,8 @@ class LyricTextView: TextView {
 
             val bounds = Rect()
             paint.getTextBounds(lyric, 0, lyric.length, bounds)
+
+            currentMilis = (SystemClock.elapsedRealtime() - chronometer.base).toFloat()
 
             if (currentMilis <= duration && canvas !=null) {
                 val ratio = currentMilis / duration
@@ -89,28 +88,28 @@ class LyricTextView: TextView {
                 )
 
                 paint.shader = shader
-//                canvas.drawText(lyric, 0f, height.toFloat(), paint)
-//                                canvas?.drawText(lyric, 0f, height.toFloat(), paint)
                 canvas.drawText(lyric, 0, lyric.length , canvas.width/2.toFloat(), canvas.height/1.5.toFloat(), paint)
-                currentMilis += framePerSecond
+
+//                currentMilis += framePerSecond
                 postInvalidateDelayed(framePerSecond)
             } else {
                 isRunning = false
+                chronometer.stop()
              }
         }
     }
 
-    override fun dispatchTouchEvent(event: MotionEvent?): Boolean {
-        return true
-    }
-    fun setTextAndDuration(mLyric: String, mDuration:Float) {
-        lyric = mLyric
-        duration = mDuration - 1000f
+    fun setKaraokeLyric(mLyric: LyricModel,currentPlayPosition:Int) {
+        lyric = mLyric.text
+
+        duration = mLyric.to - currentPlayPosition
         currentMilis =0F
+
+        chronometer.base = SystemClock.elapsedRealtime()
+        chronometer.start()
+
         mWidth =  paint.measureText(lyric, 0, lyric.length).toInt()
         isRunning = true
         requestLayout()
-        invalidate()
-
     }
 }

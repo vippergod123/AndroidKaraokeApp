@@ -7,7 +7,6 @@ import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
-import android.os.PowerManager
 import android.util.Log
 import android.view.View
 import android.view.Window
@@ -26,7 +25,8 @@ import okhttp3.*
 import java.io.IOException
 
 
-class KaraokeScreenActivity : AppCompatActivity() {
+class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlayerFinishListener {
+
 
     private var karaokeLyric: MutableList<LyricModel> = mutableListOf()
 
@@ -35,15 +35,15 @@ class KaraokeScreenActivity : AppCompatActivity() {
     private lateinit var playImageButton: ImageButton
     private lateinit var micImageButton: ImageButton
 
-
+    private var karaokeMode = ""
 //    private lateinit var lyricTopTextView: LyricTextView
 //    private lateinit var lyricBotTextView: LyricTextView
 
     private lateinit var fullScreenContent: FrameLayout
     private lateinit var fullScreenContentControl: FrameLayout
 
-
     private var song: SongModel = SongModel()
+
 
 
     private val mHideHandler = Handler()
@@ -94,14 +94,17 @@ class KaraokeScreenActivity : AppCompatActivity() {
 
 
 
-        const val BUNDLE_KARAOKE_SONG = "bundle_recording_song"
-        const val BUNDLE_KARAOKE_MODE = "bundle_recording_song"
+        const val BUNDLE_KARAOKE_SONG = "bundle_karaoke_song"
+        const val BUNDLE_KARAOKE_MODE = "bundle_kaorake_mode"
 
+        const val MODE_KARAOKE = "MODE_KARAOKE"
+        const val MODE_RECORD = "MODE_RECORD"
 
-        fun newIntent(context: Context, song: SongModel): Intent {
+        fun newIntent(context: Context, song: SongModel, mode:String): Intent {
             val intent = Intent(context, KaraokeScreenActivity::class.java)
             val bundle = Bundle()
             bundle.putSerializable(BUNDLE_KARAOKE_SONG,song)
+            bundle.putString(BUNDLE_KARAOKE_MODE,mode)
             intent.putExtras(bundle)
             return intent
         }
@@ -127,14 +130,21 @@ class KaraokeScreenActivity : AppCompatActivity() {
         play_image_button.setOnTouchListener(mDelayHideTouchListener)
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        KaraokeMediaPlayer.reset()
+    }
     override fun onPostCreate(savedInstanceState: Bundle?) {
         super.onPostCreate(savedInstanceState)
-        KaraokeMediaPlayer.init(findViewById(android.R.id.content),song)
+        KaraokeMediaPlayer.init(findViewById(android.R.id.content),song,this)
         KaraokeMediaPlayer.saveRecord()
         show()
 
     }
 
+    override fun finishActivity() {
+        finish()
+    }
     //endregion
 
     //region private method UI
@@ -185,12 +195,12 @@ class KaraokeScreenActivity : AppCompatActivity() {
 
     //endregion
 
-    //private methodX
-
+    //region private method
     private fun getDataFromBundle(){
         val bundle = intent.extras
         if (bundle != null) {
             song = bundle.getSerializable(BUNDLE_KARAOKE_SONG) as SongModel
+            karaokeMode = bundle.getString(BUNDLE_KARAOKE_MODE) as String
         }
     }
 
@@ -200,16 +210,10 @@ class KaraokeScreenActivity : AppCompatActivity() {
         playImageButton = findViewById(R.id.play_image_button)
         micImageButton = findViewById(R.id.mic_image_button)
 
-//        lyricTopTextView = findViewById(R.id.lyric_top_text_view)
-//        lyricBotTextView = findViewById(R.id.lyric_bot_text_view)
-
         fullScreenContent = findViewById(R.id.fullscreen_content)
         fullScreenContentControl = findViewById(R.id.fullscreen_content_controls)
 
         nameSongTextView.text = song.name
-
-
-
 
         val request = Request.Builder().url(song.sub_url).build()
         val client = OkHttpClient()
@@ -220,67 +224,8 @@ class KaraokeScreenActivity : AppCompatActivity() {
             }
 
             override fun onResponse(call: Call, response: Response) {
-                val  body = response.body()?.string()
-                val lyric = body!!.split("\r\n")
-                for ( i in 0 until lyric.lastIndex) {
-                    val temp = LyricModel()
-
-                    try {
-
-                        if ( lyric[i] == "") {
-                            val to = HandleDateTime.timeToMiliSeconds(
-                                lyric[i + 1].substring(
-                                    lyric[i + 1].indexOf("[") + 1,
-                                    lyric[i + 1].indexOf("]")
-                                )
-                            )
-                            karaokeLyric[karaokeLyric.lastIndex].to = to
-                            continue
-                        }
-
-                        val from = HandleDateTime.timeToMiliSeconds(
-                            lyric[i].substring(
-                                lyric[i].indexOf("[") + 1,
-                                lyric[i].indexOf("]")
-                            )
-                        )
-                        temp.from = from
-
-                        val to = HandleDateTime.timeToMiliSeconds(
-                            lyric[i + 1].substring(
-                                lyric[i + 1].indexOf("[") + 1,
-                                lyric[i + 1].indexOf("]")
-                            )
-                        )
-                        temp.to = to
-
-                        // jump when lyric mp3 zing === " "
-
-
-                        val duration = temp.to - temp.from
-                        var text = lyric[i].substring(lyric[i].indexOf("]") + 1, lyric[i].lastIndex + 1)
-
-                        if ( text == "" ) {
-                            if (duration > 4000) {
-                                text = "Nhạc dạo"
-                                temp.text = text
-                                karaokeLyric.add(temp)
-                            }
-                            else {
-                                karaokeLyric[karaokeLyric.lastIndex].to = to
-                            }
-                        }
-                        else {
-                            temp.text = text
-                            karaokeLyric.add(temp)
-                        }
-
-                    }
-                    catch(ex:Exception) {
-                        println(ex)
-                    }
-                }
-                KaraokeMediaPlayer.getKaraokeLyric(karaokeLyric)
+                val  data = response.body()?.string()
+                handleLyricStringToLyricModel(data)
             }
         })
     }
@@ -326,8 +271,6 @@ class KaraokeScreenActivity : AppCompatActivity() {
 
 
     private fun abortKaraoke() {
-
-
         val dialog = Dialog(this)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog.setCancelable(false)
@@ -341,10 +284,71 @@ class KaraokeScreenActivity : AppCompatActivity() {
             finish()
         }
         dialog.show()
+    }
 
 
-//
+    private  fun handleLyricStringToLyricModel(data:String?) {
+//        val  lyric = response.body()?.string()
+        val lyric = data!!.split("\r\n").toMutableList()
+        lyric.removeAll {
+            it == ""
+        }
 
+        for ( i in 0 until lyric.lastIndex) {
+            val temp = LyricModel()
+
+            try {
+                val from = HandleDateTime.timeToMiliSeconds(
+                    lyric[i].substring(
+                        lyric[i].indexOf("[") + 1,
+                        lyric[i].indexOf("]")
+                    )
+                )
+                temp.from = from
+
+                val to = HandleDateTime.timeToMiliSeconds(
+                    lyric[i + 1].substring(
+                        lyric[i + 1].indexOf("[") + 1,
+                        lyric[i + 1].indexOf("]")
+                    )
+                )
+                temp.to = to
+
+                // jump when lyric mp3 zing === " "
+
+
+                val duration = temp.to - temp.from
+                var text = lyric[i].substring(lyric[i].indexOf("]") + 1, lyric[i].lastIndex + 1)
+
+                if ( text == "" ) {
+                    if (duration > 4000) {
+                        text = "Nhạc dạo"
+                        temp.text = text
+                        karaokeLyric.add(temp)
+                    }
+                    else {
+                        karaokeLyric[karaokeLyric.lastIndex].to = to
+                    }
+                }
+                else {
+                    temp.text = text
+                    karaokeLyric.add(temp)
+                }
+
+            }
+            catch(ex:Exception) {
+                println(ex)
+            }
+        }
+
+        // add last lyric to made song look better at the end - needed
+        val temp = karaokeLyric[karaokeLyric.lastIndex]
+        var addLastLyric = LyricModel("Kết thúc bài hát !",temp.to,temp.to + 3000F)
+        karaokeLyric.add(addLastLyric)
+        addLastLyric = LyricModel("",temp.to,temp.to + 3000F)
+        karaokeLyric.add(addLastLyric)
+
+        KaraokeMediaPlayer.getKaraokeLyric(karaokeLyric)
     }
     //endregion
 
