@@ -17,6 +17,7 @@ import android.widget.ImageButton
 import android.widget.TextView
 import com.example.androidkaraokeapp.R
 import com.example.androidkaraokeapp.model.LyricModel
+import com.example.androidkaraokeapp.model.RecordModel
 import com.example.androidkaraokeapp.model.SongModel
 import com.example.androidkaraokeapp.ulti.HandleDateTime
 import com.example.androidkaraokeapp.ulti.KaraokeMediaPlayer
@@ -28,6 +29,7 @@ import java.io.IOException
 class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlayerFinishListener {
 
 
+
     private var karaokeLyric: MutableList<LyricModel> = mutableListOf()
 
     private lateinit var backImageButton: ImageButton
@@ -35,24 +37,20 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
     private lateinit var playImageButton: ImageButton
     private lateinit var micImageButton: ImageButton
 
-    private var karaokeMode = ""
+    private lateinit var playingMode: String
 //    private lateinit var lyricTopTextView: LyricTextView
 //    private lateinit var lyricBotTextView: LyricTextView
 
     private lateinit var fullScreenContent: FrameLayout
     private lateinit var fullScreenContentControl: FrameLayout
 
-    private var song: SongModel = SongModel()
-
+    private lateinit var song: SongModel
+    private val KaraokeHandler = Handler()
 
 
     private val mHideHandler = Handler()
     private val mHidePart2Runnable = Runnable {
-        // Delayed removal of status and navigation bar
 
-        // Note that some of these constants are new as of API 16 (Jelly Bean)
-        // and API 19 (KitKat). It is safe to use them, as they are inlined
-        // at compile-time and do nothing on earlier devices.s
         fullScreenContent.systemUiVisibility =
             View.SYSTEM_UI_FLAG_LOW_PROFILE or
                     View.SYSTEM_UI_FLAG_FULLSCREEN or
@@ -70,29 +68,12 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
 
 
     companion object {
-        /**
-         * Whether or not the system UI should be auto-hidden after
-         * [AUTO_HIDE_DELAY_MILLIS] milliseconds.
-         */
+
         private val AUTO_HIDE = true
 
-        /**
-         * If [AUTO_HIDE] is set, the number of milliseconds to wait after
-         * user interaction before hiding the system UI.
-         */
         private const val AUTO_HIDE_DELAY_MILLIS = 3000
 
-        /**
-         * Some older devices needs a small delay between UI widget updates
-         * and a change of the status and navigation bar.
-         */
         private const val UI_ANIMATION_DELAY = 300
-
-
-
-
-
-
 
         const val BUNDLE_KARAOKE_SONG = "bundle_karaoke_song"
         const val BUNDLE_KARAOKE_MODE = "bundle_kaorake_mode"
@@ -104,6 +85,15 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
             val intent = Intent(context, KaraokeScreenActivity::class.java)
             val bundle = Bundle()
             bundle.putSerializable(BUNDLE_KARAOKE_SONG,song)
+            bundle.putString(BUNDLE_KARAOKE_MODE,mode)
+            intent.putExtras(bundle)
+            return intent
+        }
+
+        fun newIntentRecord(context: Context, record: RecordModel, mode:String): Intent  {
+            val intent = Intent(context, KaraokeScreenActivity::class.java)
+            val bundle = Bundle()
+            bundle.putSerializable(BUNDLE_KARAOKE_SONG,record)
             bundle.putString(BUNDLE_KARAOKE_MODE,mode)
             intent.putExtras(bundle)
             return intent
@@ -134,16 +124,20 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
         super.onDestroy()
         KaraokeMediaPlayer.reset()
     }
+
     override fun onPostCreate(savedInstanceState: Bundle?) {
         super.onPostCreate(savedInstanceState)
-        KaraokeMediaPlayer.init(findViewById(android.R.id.content),song,this)
-        KaraokeMediaPlayer.saveRecord()
-        show()
-
+//        KaraokeMediaPlayer.init(findViewById(android.R.id.content),song,this)
+//        show()
     }
+
 
     override fun finishActivity() {
         finish()
+    }
+
+    override fun finishPrepareKaraoke() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
     //endregion
 
@@ -199,8 +193,15 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
     private fun getDataFromBundle(){
         val bundle = intent.extras
         if (bundle != null) {
-            song = bundle.getSerializable(BUNDLE_KARAOKE_SONG) as SongModel
-            karaokeMode = bundle.getString(BUNDLE_KARAOKE_MODE) as String
+            playingMode = bundle.getString(BUNDLE_KARAOKE_MODE) as String
+            when (playingMode) {
+                MODE_KARAOKE -> {
+                    song = bundle.getSerializable(BUNDLE_KARAOKE_SONG) as SongModel
+                }
+                MODE_RECORD -> {
+                    song = bundle.getSerializable(BUNDLE_KARAOKE_SONG) as RecordModel
+                }
+            }
         }
     }
 
@@ -245,13 +246,28 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
                 true -> {
                     // media playing ->  stop, play icon
 //                    KaraokeMediaPlayer.pause()
+
                     KaraokeMediaPlayer.stop()
+                    if ( playingMode == MODE_KARAOKE)
+                        KaraokeMediaPlayer.saveRecord()
                     finish()
                 }
 
                 false -> {
                     // media stop ->  play, pause icon
-                    KaraokeMediaPlayer.play()
+                    playImageButton.setImageResource(R.drawable.ic_pause_black_36dp)
+                    loading_text_view.visibility = View.VISIBLE
+                    fullScreenContentControl.visibility = View.INVISIBLE
+
+                    if ( !KaraokeMediaPlayer.isInit )
+                        KaraokeHandler.postDelayed({
+                            loading_text_view.visibility = View.INVISIBLE
+                            KaraokeMediaPlayer.init(findViewById(android.R.id.content),song,playingMode,this)
+                            KaraokeMediaPlayer.play()
+                        },100)
+
+
+
                 }
             }
             delayedHide(AUTO_HIDE_DELAY_MILLIS)
@@ -262,6 +278,8 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
                 true -> {
                     // recording ->  stop
                     KaraokeMediaPlayer.stop()
+                    if (playingMode == MODE_KARAOKE)
+                        KaraokeMediaPlayer.saveRecord()
                     finish()
                 }
             }
@@ -271,19 +289,28 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
 
 
     private fun abortKaraoke() {
-        val dialog = Dialog(this)
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-        dialog.setCancelable(false)
-        dialog.setContentView(R.layout.kaorake_abort_dialog)
+        when( playingMode) {
+            MODE_KARAOKE->{
+                val dialog = Dialog(this)
+                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+                dialog.setCancelable(false)
+                dialog.setContentView(R.layout.kaorake_abort_dialog)
 
-        val abortButton = dialog.findViewById(R.id.karaoke_abort_button) as Button
-        val cancleButton = dialog.findViewById(R.id.karaoke_cancel_button) as Button
-        cancleButton.setOnClickListener { dialog.dismiss() }
-        abortButton.setOnClickListener{
-            KaraokeMediaPlayer.abort()
-            finish()
+                val abortButton = dialog.findViewById(R.id.karaoke_abort_button) as Button
+                val cancleButton = dialog.findViewById(R.id.karaoke_cancel_button) as Button
+                cancleButton.setOnClickListener { dialog.dismiss() }
+                abortButton.setOnClickListener{
+                    KaraokeMediaPlayer.abort()
+                    finish()
+                }
+                dialog.show()
+            }
+            MODE_RECORD-> {
+                KaraokeMediaPlayer.abort()
+                finish()
+            }
         }
-        dialog.show()
+
     }
 
 
@@ -313,9 +340,6 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
                     )
                 )
                 temp.to = to
-
-                // jump when lyric mp3 zing === " "
-
 
                 val duration = temp.to - temp.from
                 var text = lyric[i].substring(lyric[i].indexOf("]") + 1, lyric[i].lastIndex + 1)

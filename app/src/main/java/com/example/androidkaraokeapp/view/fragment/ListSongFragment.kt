@@ -49,8 +49,7 @@ class ListSongFragment : Fragment(), ListSongContract.View {
         super.onActivityCreated(savedInstanceState)
         view?.let {
             configureUI(it)
-            setupPresenter()
-            listSongPresenter.fetchListSongFromFirestore(listSong)
+
         }
     }
     //endregion
@@ -69,6 +68,8 @@ class ListSongFragment : Fragment(), ListSongContract.View {
         listSongRecyclerView.adapter = ListSongRecyclerViewAdapter(listSong)
         listSongAdapter = listSongRecyclerView.adapter as ListSongRecyclerViewAdapter
 
+        listSongPresenter.fetchListSongFromFirestore(listSong)
+
         searchTextView.setOnClickListener {
             val intent = Intent(it.context, SearchActivity::class.java)
 // To pass any data to next activity
@@ -76,8 +77,8 @@ class ListSongFragment : Fragment(), ListSongContract.View {
 // start your next activity
             startActivity(intent)
         }
+        setupPresenter()
     }
-
     private fun setupPresenter() {
         listSongPresenter.setView(this)
     }

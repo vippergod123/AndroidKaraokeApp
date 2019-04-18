@@ -19,13 +19,16 @@ import android.media.MediaMetadataRetriever
 import android.os.AsyncTask
 import com.example.androidkaraokeapp.ulti.HandleDateTime
 import android.os.Build
-import android.util.AttributeSet
 import android.view.View
-import com.example.androidkaraokeapp.ulti.KaraokeMediaPlayer
+import com.example.androidkaraokeapp.model.RecordModel
+import com.example.androidkaraokeapp.presenter.ListRecordContract
+import com.example.androidkaraokeapp.presenter.ListRecordPresenter
+import com.example.androidkaraokeapp.view.recyclerView.ListRecordRecyclerView.ListRecordRecyclerViewAdapter
 
 
 @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-class PrepareSongActivity : AppCompatActivity() {
+class PrepareSongActivity : AppCompatActivity(), ListRecordContract.View {
+
 
     private lateinit var listShortRecordRecyclerView: RecyclerView
     private lateinit var songDurationTextView: TextView
@@ -33,7 +36,13 @@ class PrepareSongActivity : AppCompatActivity() {
     private lateinit var userSingTextView: TextView
     private lateinit var thumbnailImageView: ImageView
     private lateinit var songDetailFrameLayout: FrameLayout
-    private var song: SongModel ?= SongModel()
+
+
+    private lateinit var listRecordAdapter: ListShortRecordRecyclerViewAdapter
+
+    private var listRecordPresenter = ListRecordPresenter()
+    private var listRecord: MutableList<RecordModel> = mutableListOf()
+    private var song: SongModel = SongModel()
 
     companion object {
 
@@ -48,12 +57,15 @@ class PrepareSongActivity : AppCompatActivity() {
         }
     }
 
+    //region override method
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_prepare_song)
         getDataFromBundle()
         configureUI()
+        setupPresenter()
         setupListener()
+
     }
 
 
@@ -63,17 +75,29 @@ class PrepareSongActivity : AppCompatActivity() {
         super.onPostCreate(savedInstanceState)
 //        listShortRecordRecyclerView.adapter =  ListShortRecordRecyclerViewAdapter(this,song!!.id)
         songDurationTextView.text = "Thời gian: đang xử lý..."
-        val backGroundTask = CalculateDurationSong(song!!.mp3_url, callBack  = {
+        val backGroundTask = CalculateDurationSong(song.mp3_url, callBack  = {
             songDurationTextView.text = "Thời gian: $it"
         })
         backGroundTask.execute()
 
     }
 
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
-        listShortRecordRecyclerView.adapter =  ListShortRecordRecyclerViewAdapter(this,song!!.id)
+    override fun onResume() {
+        super.onResume()
+        listRecordPresenter.findRecordBySong(listRecord,song)
     }
+
+    override fun showListRecord() {
+        listShortRecordRecyclerView.adapter = ListShortRecordRecyclerViewAdapter(listRecord)
+    }
+
+    override fun updateListRecord(removeRecord: RecordModel) {
+        println()
+    }
+
+    //endregion
+
+    //region private method
     @SuppressLint("SetTextI18n")
     private fun configureUI () {
         listShortRecordRecyclerView = findViewById(R.id.list_short_record_recycler_view)
@@ -84,14 +108,15 @@ class PrepareSongActivity : AppCompatActivity() {
         songDetailFrameLayout = findViewById(R.id.song_detail_frame_layout)
 
 
-        songNameTextView.text = song!!.name
-        userSingTextView.text = "Singer: ${song!!.singer}"
-        Picasso.get().load(song!!.thumbnail_url).fit().into(thumbnailImageView)
+        songNameTextView.text = song.name
+        userSingTextView.text = "Singer: ${song.singer}"
+        Picasso.get().load(song.thumbnail_url).fit().into(thumbnailImageView)
 
 
 
         listShortRecordRecyclerView.layoutManager = LinearLayoutManager(this.applicationContext)
-
+        listShortRecordRecyclerView.adapter =  ListShortRecordRecyclerViewAdapter(listRecord)
+        listRecordAdapter = listShortRecordRecyclerView.adapter as ListShortRecordRecyclerViewAdapter
 
         //        Add divider to viewholder
         val dividerItemDecoration = DividerItemDecoration(this.applicationContext, LinearLayoutManager.VERTICAL)
@@ -109,10 +134,16 @@ class PrepareSongActivity : AppCompatActivity() {
 
     private fun setupListener() {
         songDetailFrameLayout.setOnClickListener {
-            val intent = KaraokeScreenActivity.newIntent(it.context.applicationContext, song!!, KaraokeScreenActivity.MODE_KARAOKE)
+            val intent = KaraokeScreenActivity.newIntent(it.context.applicationContext, song, KaraokeScreenActivity.MODE_KARAOKE)
             startActivity(intent)
         }
     }
+
+    private fun setupPresenter() {
+        listRecordPresenter.setView(this)
+    }
+    //endregion
+
 }
 
 

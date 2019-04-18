@@ -27,12 +27,13 @@ class ListShortRecordViewHolder(itemView: View?) : RecyclerView.ViewHolder(itemV
 
             val mmr = MediaMetadataRetriever()
 
-            mmr.setDataSource(record.record_url)
-            val duration = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+            val recordFolder = itemView.context.filesDir.path + "/record"
+            val pathRecord =  recordFolder+ "/" +record.record_url
+            mmr.setDataSource(pathRecord)
 
+            val duration = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
             val durationTimeString = HandleDateTime.miliSecondToTime(duration.toLong())
             val dateCreateString = HandleDateTime.miliSecondToDateFormat(record.create_time, "dd/MM/yyyy hh:mm")
-
             shortRecordDurationTimeTextView.text = "Thời gian: $durationTimeString - $dateCreateString"
         } catch (ex: RuntimeException) {
             // something went wrong with the file, ignore it and continue
@@ -40,6 +41,8 @@ class ListShortRecordViewHolder(itemView: View?) : RecyclerView.ViewHolder(itemV
 
         contentConstraintLayout.setOnClickListener {
 //            val intent = KaraokeScreenActivity.newIntent(itemView.context.applicationContext,record)
+            val intent = KaraokeScreenActivity.newIntentRecord(it.context.applicationContext, record, KaraokeScreenActivity.MODE_RECORD)
+            it.context.startActivity(intent)
         }
     }
 }

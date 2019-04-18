@@ -42,7 +42,7 @@
                     app:layout_constraintTop_toBottomOf="@+id/record_song_name_text_view"
                     android:layout_marginTop="14dp" android:textAlignment="viewStart"/>
             <TextView
-                    android:text="Time: 99:99"
+                    android:text="Thời gian: Nan"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/record_duration_text_view" android:layout_marginEnd="20dp"

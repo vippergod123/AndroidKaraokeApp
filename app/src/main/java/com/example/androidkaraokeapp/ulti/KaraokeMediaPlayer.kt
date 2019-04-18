@@ -11,6 +11,7 @@ import com.example.androidkaraokeapp.R
 import com.example.androidkaraokeapp.model.LyricModel
 import com.example.androidkaraokeapp.model.RecordModel
 import com.example.androidkaraokeapp.model.SongModel
+import com.example.androidkaraokeapp.view.KaraokeScreenActivity
 import com.example.androidkaraokeapp.view.custom_view.LyricTextView
 import java.io.File
 
@@ -22,6 +23,7 @@ object KaraokeMediaPlayer {
 
     var isPlaying: Boolean = false
     var isRecording: Boolean = false
+    var isInit: Boolean = false
 
     private lateinit var recordSavePath: String
 
@@ -30,6 +32,10 @@ object KaraokeMediaPlayer {
 
     private var currentIndexKaraokeLyric:Int = -1
     private var nextIndexKaraokeLyric:Int = 0
+
+    private lateinit var playingMode:String
+
+
 
     private var karaokeLyric: MutableList<LyricModel> = mutableListOf()
 
@@ -49,6 +55,7 @@ object KaraokeMediaPlayer {
 
     interface MediaPlayerFinishListener {
         fun finishActivity()
+        fun finishPrepareKaraoke()
     }
     private var mediaPlayerFinishListener: MediaPlayerFinishListener ?= null
 
@@ -65,26 +72,35 @@ object KaraokeMediaPlayer {
 
         durationSeekBar = view.findViewById(R.id.duration_seek_bar)
 
-        durationSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                println("onProgressChanged")
-                currentPlayPosition = progress
+        when (playingMode) {
+            KaraokeScreenActivity.MODE_RECORD->{
+                micImageButton.visibility = View.INVISIBLE
+
+                durationSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                    override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                        println("onProgressChanged")
+                        currentPlayPosition = progress
+
+                    }
+                    override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                        println("onStartTrackingTouch")
+                    }
+                    override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                        println("onStopTrackingTouch")
+                        mediaPlayer.seekTo(currentPlayPosition)
+                        nextIndexKaraokeLyric = -1
+                        lyricTopTextView.isRunning = false
+                        startTrackingPositionMedia()
+                    }
+                })
+            }
+            KaraokeScreenActivity.MODE_KARAOKE->{
 
             }
 
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {
-                println("onStartTrackingTouch")
-            }
+        }
 
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                println("onStopTrackingTouch")
-                mediaPlayer.seekTo(currentPlayPosition)
-                nextIndexKaraokeLyric = -1
-                lyricTopTextView.isRunning = false
-                startTrackingPositionMedia()
-            }
 
-        })
 
         mediaPlayer.setOnCompletionListener {
             stop()
@@ -159,28 +175,32 @@ object KaraokeMediaPlayer {
 
     private fun prepare() {
         mediaPlayer.reset()
-        mediaRecorder.reset()
+
         val folderSavePath = view.context.applicationContext.filesDir.path + "/record"
         val file = File(folderSavePath)
-
-        if (!file.exists()){
-            file.mkdirs()
-        }
 
         currentCreateTime = System.currentTimeMillis()
         recordSavePath = "/${"Duy"}_${song.id}_${song.alias}_$currentCreateTime.mp3"
         val recordOutput = file.path + recordSavePath
 
-        mediaPlayer.setDataSource(song.mp3_url)
+        var pathSource = song.mp3_url
+        if ( playingMode == KaraokeScreenActivity.MODE_RECORD)
+            pathSource = file.path + (song as RecordModel).record_url
+        mediaPlayer.setDataSource(pathSource)
         mediaPlayer.prepare()
 
-        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC)
-        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-        mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-        mediaRecorder.setOutputFile(recordOutput)
-        mediaRecorder.prepare()
+        if ( playingMode == KaraokeScreenActivity.MODE_KARAOKE) {
 
-
+            if (!file.exists()){
+                file.mkdirs()
+            }
+            mediaRecorder.reset()
+            mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC)
+            mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+            mediaRecorder.setOutputFile(recordOutput)
+            mediaRecorder.prepare()
+        }
 
 
         durationSeekBar.max = mediaPlayer.duration
@@ -190,24 +210,37 @@ object KaraokeMediaPlayer {
         durationTextView.text = duration
     }
 
+    private fun deleteRecordingSaveFile () {
+        val abortRecordingFile = view.context.applicationContext.filesDir.path + "/record" + recordSavePath
+        val file = File(abortRecordingFile)
+        if (file.exists())
+            file.delete()
+    }
     //endregion
 
     //region method public
-    fun init(mView: View, inputSong: SongModel,listner: MediaPlayerFinishListener) {
+    fun init(mView: View, inputSong: SongModel, mode:String, listener: MediaPlayerFinishListener) {
         song = inputSong
+
         view = mView
-        mediaPlayerFinishListener = listner
+        playingMode = mode
+        mediaPlayerFinishListener = listener
 
         configureUI()
         prepare()
+
+        isInit = true
     }
 
     fun play() {
-        playImageButton.setImageResource(R.drawable.ic_pause_black_36dp)
+
         mediaPlayer.seekTo(currentPlayPosition)
 
         mediaPlayer.start()
-        startRecording()
+
+        if ( playingMode == KaraokeScreenActivity.MODE_KARAOKE) {
+            startRecording()
+        }
 
         isPlaying = true
         isRecording = true
@@ -220,7 +253,11 @@ object KaraokeMediaPlayer {
         currentPlayPosition = mediaPlayer.currentPosition
 
         mediaPlayer.stop()
-        stopRecording()
+
+        if ( playingMode == KaraokeScreenActivity.MODE_KARAOKE)
+            stopRecording()
+        else
+            deleteRecordingSaveFile()
 
         isPlaying = false
         isRecording = false
@@ -228,9 +265,11 @@ object KaraokeMediaPlayer {
     }
 
     fun saveRecord() {
-        val record = RecordModel(song.id, song.name, "Duy",recordSavePath, song.thumbnail_url, 123213, currentCreateTime)
+//        val record = RecordModel(song.id, song.name, "Duy",recordSavePath, song.thumbnail_url, 123213, currentCreateTime)
+//        val record = RecordModel(song.id,song.name, song.sub_url,"Duy Khá bảnh", recordSavePath,song.thumbnail_url,song.alias,currentCreateTime)
+        val record = RecordModel(song.id,song.name,song.sub_url,song.thumbnail_url,song.alias,"Duy Khá bảnh", recordSavePath, currentCreateTime)
 
-        recordFirebaseCollection.add(record)
+        recordFirebaseCollection.document(currentCreateTime.toString()).set(record)
             .addOnSuccessListener {
 
             }
@@ -242,11 +281,7 @@ object KaraokeMediaPlayer {
     fun abort() {
 
         stop()
-        val abortRecordingFile = view.context.applicationContext.filesDir.path + "/record" + recordSavePath
-        val file = File(abortRecordingFile)
-
-        if ( file.exists() )
-            file.delete()
+       deleteRecordingSaveFile()
 
     }
 
@@ -263,5 +298,6 @@ object KaraokeMediaPlayer {
         currentIndexKaraokeLyric = -1
         nextIndexKaraokeLyric = -1
 
+        isInit = false
     }
 }

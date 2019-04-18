@@ -10,10 +10,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.example.androidkaraokeapp.R
+import com.example.androidkaraokeapp.model.RecordModel
+import com.example.androidkaraokeapp.presenter.ListRecordContract
+import com.example.androidkaraokeapp.presenter.ListRecordPresenter
 import com.example.androidkaraokeapp.view.recyclerView.ListRecordRecyclerView.ListRecordRecyclerViewAdapter
 
-class UserFragment: Fragment() {
+class UserFragment: Fragment(),ListRecordContract.View  {
+
+
+
     private lateinit var listRecordRecyclerView: RecyclerView
+    private var listRecordPresenter = ListRecordPresenter()
+    private var listRecord: MutableList<RecordModel> = mutableListOf()
+    private lateinit var listRecordAdapter: ListRecordRecyclerViewAdapter
+
     companion object {
         @SuppressLint("StaticFieldLeak")
         @Volatile
@@ -33,18 +43,39 @@ class UserFragment: Fragment() {
         super.onActivityCreated(savedInstanceState)
 //        viewModel = ViewModelProviders.of(this).get(ListSongViewModel::class.java)
         view?.let{
+            setupPresenter()
             configureUI(it)
         }
     }
 
+    override fun showListRecord() {
+        this.listRecordRecyclerView.adapter = ListRecordRecyclerViewAdapter(listRecord,listRecordPresenter)
+    }
+
+    override fun updateListRecord(removeRecord: RecordModel) {
+        listRecord.remove(removeRecord)
+        this.listRecordRecyclerView.adapter = ListRecordRecyclerViewAdapter(listRecord,listRecordPresenter)
+    }
+    //region private method
     private fun configureUI (it:View) {
+
         listRecordRecyclerView = it.findViewById(R.id.list_record_recycler_view)
         listRecordRecyclerView.layoutManager = LinearLayoutManager(activity)
-        listRecordRecyclerView.adapter =  ListRecordRecyclerViewAdapter(it.context.applicationContext)
+        listRecordRecyclerView.adapter =  ListRecordRecyclerViewAdapter(listRecord, listRecordPresenter)
+        listRecordAdapter = listRecordRecyclerView.adapter as ListRecordRecyclerViewAdapter
 
         //        Add divider to viewholder
         val dividerItemDecoration = DividerItemDecoration(context!!, LinearLayoutManager.VERTICAL)
         dividerItemDecoration.setDrawable(context!!.resources.getDrawable(R.drawable.divider_recycler_view))
         listRecordRecyclerView.addItemDecoration(dividerItemDecoration)
+
+        listRecordPresenter.fetchRecordFromFirestore(listRecord)
+
     }
+
+    private fun setupPresenter() {
+        listRecordPresenter.setView(this)
+    }
+    //endregion
+
 }
