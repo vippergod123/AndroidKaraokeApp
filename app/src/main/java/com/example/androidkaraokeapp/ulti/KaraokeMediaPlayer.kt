@@ -34,7 +34,7 @@ object KaraokeMediaPlayer {
     private var currentIndexKaraokeLyric:Int = -1
     private var nextIndexKaraokeLyric:Int = 0
 
-    private lateinit var playingMode:String
+    lateinit var playingMode:String
     private lateinit var karaokeTrackingRunnable :Runnable
 
     private var karaokeLyric: MutableList<LyricModel> = mutableListOf()
@@ -74,8 +74,9 @@ object KaraokeMediaPlayer {
 
 
         when (playingMode) {
-            KaraokeScreenActivity.MODE_RECORD->{
-                micImageButton.visibility = View.INVISIBLE
+            KaraokeScreenActivity.MODE_RECORD,KaraokeScreenActivity.MODE_KARAOKE_TEST->{
+                if (playingMode == KaraokeScreenActivity.MODE_RECORD)
+                    micImageButton.visibility = View.INVISIBLE
 
                 durationSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -109,6 +110,7 @@ object KaraokeMediaPlayer {
 
 
     private fun setupKaraokeTrackingRunnable() {
+
         karaokeTrackingRunnable = Runnable {
             do {
                 try {
@@ -150,8 +152,11 @@ object KaraokeMediaPlayer {
     }
 
     private fun startTrackingPositionMedia() {
+        lyricTopTextView.visibility = View.VISIBLE
+        lyricBotTextView.visibility = View.VISIBLE
         setupKaraokeTrackingRunnable()
         Thread(karaokeTrackingRunnable).start()
+
     }
 
     private fun findIndexPlayingLyric(currentPlayPosition:Int) {
@@ -238,10 +243,10 @@ object KaraokeMediaPlayer {
 
         if ( playingMode == KaraokeScreenActivity.MODE_KARAOKE) {
             startRecording()
+            isRecording = true
         }
 
         isPlaying = true
-        isRecording = true
         startTrackingPositionMedia()
     }
 
@@ -310,8 +315,11 @@ object KaraokeMediaPlayer {
         currentCreateTime = -1
 
         currentIndexKaraokeLyric = -1
-        nextIndexKaraokeLyric = -1
+        nextIndexKaraokeLyric = 0
 
+        lyricTopTextView.isRunning = false
+        lyricTopTextView.visibility = View.INVISIBLE
+        lyricBotTextView.visibility = View.INVISIBLE
         isInit = false
     }
 

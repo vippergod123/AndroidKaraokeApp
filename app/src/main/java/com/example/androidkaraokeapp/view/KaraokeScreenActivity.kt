@@ -7,6 +7,7 @@ import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.os.Handler
 import android.support.v4.content.ContextCompat
 import android.util.Log
@@ -24,6 +25,7 @@ import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_recording_fullscreen.*
 import okhttp3.*
 import java.io.IOException
+import kotlin.math.round
 import kotlin.random.Random
 
 
@@ -34,7 +36,7 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
     private var karaokeLyric: MutableList<LyricModel> = mutableListOf()
 
     private lateinit var nameSongTextView: TextView
-
+    private lateinit var countDownTextView: TextView
     private lateinit var backImageButton: ImageButton
     private lateinit var playImageButton: ImageButton
     private lateinit var micImageButton: ImageButton
@@ -78,6 +80,7 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
         const val BUNDLE_KARAOKE_MODE = "bundle_kaorake_mode"
 
         const val MODE_KARAOKE = "MODE_KARAOKE"
+        const val MODE_KARAOKE_TEST = "MODE_KARAOKE_TEST"
         const val MODE_RECORD = "MODE_RECORD"
 
         fun newIntent(context: Context, song: SongModel, mode:String): Intent {
@@ -180,8 +183,7 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
     }
 
     private fun setBackgroundEverySecond(duration:Long) {
-        val backgroundDrawable = arrayListOf(
-                                                            R.drawable.background_1,
+        val backgroundDrawable = arrayListOf(  R.drawable.background_1,
                                                             R.drawable.background_2,
                                                             R.drawable.background_3,
                                                             R.drawable.background_4,
@@ -217,7 +219,7 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
         if (bundle != null) {
             playingMode = bundle.getString(BUNDLE_KARAOKE_MODE) as String
             when (playingMode) {
-                MODE_KARAOKE -> {
+                MODE_KARAOKE, MODE_KARAOKE_TEST -> {
                     song = bundle.getSerializable(BUNDLE_KARAOKE_SONG) as SongModel
                 }
                 MODE_RECORD -> {
@@ -232,6 +234,7 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
         nameSongTextView = findViewById(R.id.name_song_text_view)
         playImageButton = findViewById(R.id.play_image_button)
         micImageButton = findViewById(R.id.mic_image_button)
+        countDownTextView = findViewById(R.id.count_down_text_view)
 
         fullScreenContent = findViewById(R.id.fullscreen_content)
         fullScreenContentControl = findViewById(R.id.fullscreen_content_controls)
@@ -262,6 +265,7 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
             if ( KaraokeMediaPlayer.isRecording)
                 abortKaraoke()
             else {
+                KaraokeMediaPlayer.abort()
                 finish()
             }
         }
@@ -279,7 +283,7 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
                             KaraokeMediaPlayer.saveRecord()
                             finish()
                         }
-                        MODE_RECORD -> {
+                        MODE_RECORD, MODE_KARAOKE_TEST -> {
                             KaraokeMediaPlayer.pause()
                         }
                     }
@@ -296,7 +300,18 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
                         KaraokeHandler.postDelayed({
                             loading_text_view.visibility = View.INVISIBLE
                             KaraokeMediaPlayer.init(findViewById(android.R.id.content), song, playingMode, this)
-                            KaraokeMediaPlayer.play()
+
+                            when (playingMode) {
+                                MODE_KARAOKE -> {
+                                    countDownSeconds(4)
+                                    KaraokeHandler.postDelayed({
+                                        KaraokeMediaPlayer.play()
+                                    },5500)
+                                }
+                                MODE_RECORD,MODE_KARAOKE_TEST -> {
+                                    KaraokeMediaPlayer.play()
+                                }
+                            }
                         }, 100)
                     }
                     else if ( !KaraokeMediaPlayer.isPlaying )
@@ -304,7 +319,7 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
                             MODE_KARAOKE-> {
 
                             }
-                            MODE_RECORD -> {
+                            MODE_RECORD,MODE_KARAOKE_TEST -> {
                                 KaraokeMediaPlayer.resume()
                             }
                         }
@@ -317,6 +332,22 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
 
         micImageButton.setOnClickListener {
             when (KaraokeMediaPlayer.isRecording) {
+                false -> {
+                    KaraokeMediaPlayer.playingMode = MODE_KARAOKE
+                    playingMode = MODE_KARAOKE
+                    KaraokeMediaPlayer.reset()
+                    loading_text_view.visibility = View.VISIBLE
+                    fullScreenContentControl.visibility = View.INVISIBLE
+                    KaraokeHandler.postDelayed({
+                        loading_text_view.visibility = View.INVISIBLE
+                        KaraokeMediaPlayer.init(findViewById(android.R.id.content), song, playingMode, this)
+                        countDownSeconds(4)
+                        KaraokeHandler.postDelayed({
+                            KaraokeMediaPlayer.play()
+                        },5500)
+
+                    }, 100)
+                }
                 true -> {
                     // recording ->  stop
                     KaraokeMediaPlayer.stop()
@@ -347,7 +378,7 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
                 }
                 dialog.show()
             }
-            MODE_RECORD-> {
+            MODE_RECORD, MODE_KARAOKE_TEST-> {
                 KaraokeMediaPlayer.abort()
                 finish()
             }
@@ -418,4 +449,17 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
     }
     //endregion
 
+    private fun countDownSeconds (duration: Long ) {
+        countDownTextView.visibility = View.VISIBLE
+        object: CountDownTimer(duration * 1000,900) {
+            override fun onTick(millisUntilFinished: Long) {
+                countDownTextView.text = round(millisUntilFinished.toFloat()/1000).toInt().toString()
+            }
+
+            override fun onFinish() {
+                countDownTextView.text = "Bắt đầu thu..."
+                KaraokeHandler.postDelayed({countDownTextView.visibility = View.INVISIBLE}, 1000)
+            }
+        }.start()
+    }
 }

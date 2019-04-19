@@ -113,4 +113,6 @@ class LyricTextView: TextView {
         requestLayout()
 
     }
+
+
 }

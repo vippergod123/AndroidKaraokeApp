@@ -134,7 +134,7 @@ class PrepareSongActivity : AppCompatActivity(), ListRecordContract.View {
 
     private fun setupListener() {
         songDetailFrameLayout.setOnClickListener {
-            val intent = KaraokeScreenActivity.newIntent(it.context.applicationContext, song, KaraokeScreenActivity.MODE_KARAOKE)
+            val intent = KaraokeScreenActivity.newIntent(it.context.applicationContext, song, KaraokeScreenActivity.MODE_KARAOKE_TEST)
             startActivity(intent)
         }
     }
