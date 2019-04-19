@@ -24,7 +24,7 @@ class LyricTextView: TextView {
     private var strokeWidth = 10f
     private lateinit var chronometer: Chronometer
 
-    var framePerSecond:Long = 1000/60
+    var framePerSecond:Long = 1000/24
     var isRunning = false
 
 
@@ -67,12 +67,9 @@ class LyricTextView: TextView {
     //region private method
 
     private fun drawText(canvas: Canvas?) {
-        if (isRunning) {
 
             val bounds = Rect()
             paint.getTextBounds(lyric, 0, lyric.length, bounds)
-
-            currentMilis = (SystemClock.elapsedRealtime() - chronometer.base).toFloat()
 
             if (currentMilis <= duration && canvas !=null) {
                 val ratio = currentMilis / duration
@@ -90,16 +87,18 @@ class LyricTextView: TextView {
                 paint.shader = shader
                 canvas.drawText(lyric, 0, lyric.length , canvas.width/2.toFloat(), canvas.height/1.5.toFloat(), paint)
 
-//                currentMilis += framePerSecond
-                postInvalidateDelayed(framePerSecond)
-            } else {
+                if ( isRunning ){
+                    currentMilis = (SystemClock.elapsedRealtime() - chronometer.base).toFloat()
+                    postInvalidateDelayed(framePerSecond)
+                }
+            }
+            else {
                 isRunning = false
                 chronometer.stop()
              }
-        }
     }
 
-    fun setKaraokeLyric(mLyric: LyricModel,currentPlayPosition:Int) {
+    fun setKaraokeLyric(mLyric: LyricModel,currentPlayPosition:Int, mediaPlayerIsPlaying: Boolean) {
         lyric = mLyric.text
 
         duration = mLyric.to - currentPlayPosition
@@ -109,7 +108,9 @@ class LyricTextView: TextView {
         chronometer.start()
 
         mWidth =  paint.measureText(lyric, 0, lyric.length).toInt()
-        isRunning = true
+        isRunning = mediaPlayerIsPlaying
+
         requestLayout()
+
     }
 }

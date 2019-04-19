@@ -32,20 +32,18 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
 
     private var karaokeLyric: MutableList<LyricModel> = mutableListOf()
 
-    private lateinit var backImageButton: ImageButton
     private lateinit var nameSongTextView: TextView
+
+    private lateinit var backImageButton: ImageButton
     private lateinit var playImageButton: ImageButton
     private lateinit var micImageButton: ImageButton
-
-    private lateinit var playingMode: String
-//    private lateinit var lyricTopTextView: LyricTextView
-//    private lateinit var lyricBotTextView: LyricTextView
 
     private lateinit var fullScreenContent: FrameLayout
     private lateinit var fullScreenContentControl: FrameLayout
 
     private lateinit var song: SongModel
     private val KaraokeHandler = Handler()
+    private lateinit var playingMode: String
 
 
     private val mHideHandler = Handler()
@@ -124,13 +122,6 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
         super.onDestroy()
         KaraokeMediaPlayer.reset()
     }
-
-    override fun onPostCreate(savedInstanceState: Bundle?) {
-        super.onPostCreate(savedInstanceState)
-//        KaraokeMediaPlayer.init(findViewById(android.R.id.content),song,this)
-//        show()
-    }
-
 
     override fun finishActivity() {
         finish()
@@ -226,7 +217,10 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
 
             override fun onResponse(call: Call, response: Response) {
                 val  data = response.body()?.string()
-                handleLyricStringToLyricModel(data)
+                runOnUiThread {
+                    handleLyricStringToLyricModel(data)
+                }
+
             }
         })
     }
@@ -247,25 +241,42 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
                     // media playing ->  stop, play icon
 //                    KaraokeMediaPlayer.pause()
 
-                    KaraokeMediaPlayer.stop()
-                    if ( playingMode == MODE_KARAOKE)
-                        KaraokeMediaPlayer.saveRecord()
-                    finish()
+                    playImageButton.setImageResource(R.drawable.ic_play_arrow_black_36dp)
+                    when (playingMode) {
+                        MODE_KARAOKE -> {
+                            KaraokeMediaPlayer.stop()
+                            KaraokeMediaPlayer.saveRecord()
+                            finish()
+                        }
+                        MODE_RECORD -> {
+                            KaraokeMediaPlayer.pause()
+                        }
+                    }
+
                 }
 
                 false -> {
                     // media stop ->  play, pause icon
                     playImageButton.setImageResource(R.drawable.ic_pause_black_36dp)
-                    loading_text_view.visibility = View.VISIBLE
-                    fullScreenContentControl.visibility = View.INVISIBLE
 
-                    if ( !KaraokeMediaPlayer.isInit )
+                    if ( !KaraokeMediaPlayer.isInit ) {
+                        loading_text_view.visibility = View.VISIBLE
+                        fullScreenContentControl.visibility = View.INVISIBLE
                         KaraokeHandler.postDelayed({
                             loading_text_view.visibility = View.INVISIBLE
-                            KaraokeMediaPlayer.init(findViewById(android.R.id.content),song,playingMode,this)
+                            KaraokeMediaPlayer.init(findViewById(android.R.id.content), song, playingMode, this)
                             KaraokeMediaPlayer.play()
-                        },100)
+                        }, 100)
+                    }
+                    else if ( !KaraokeMediaPlayer.isPlaying )
+                        when( playingMode) {
+                            MODE_KARAOKE-> {
 
+                            }
+                            MODE_RECORD -> {
+                                KaraokeMediaPlayer.resume()
+                            }
+                        }
 
 
                 }

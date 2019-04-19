@@ -10,10 +10,12 @@ import com.example.androidkaraokeapp.R
 import com.example.androidkaraokeapp.model.RecordModel
 import android.media.MediaMetadataRetriever
 import android.widget.Button
+import android.widget.FrameLayout
 import com.example.androidkaraokeapp.presenter.ListRecordContract
 import com.example.androidkaraokeapp.presenter.ListRecordPresenter
 import com.example.androidkaraokeapp.ulti.HandleDateTime
 import com.example.androidkaraokeapp.ulti.Handle_UI
+import com.example.androidkaraokeapp.view.KaraokeScreenActivity
 import com.squareup.picasso.Picasso
 import java.io.File
 
@@ -23,6 +25,8 @@ class ListRecordViewHolder(itemView: View?) : RecyclerView.ViewHolder(itemView!!
     private val recordUserNameTextView = itemView?.findViewById(R.id.record_user_name_text_view) as TextView
     private val recordDurationTextView = itemView?.findViewById(R.id.record_duration_text_view) as TextView
     private val recordDeleteButton = itemView?.findViewById(R.id.record_delete_button) as Button
+    private val recordContentFrameLayout = itemView?.findViewById(R.id.record_content_frame_layout) as FrameLayout
+
 
     private val recordImageView = itemView?.findViewById(R.id.record_image_view) as ImageView
 
@@ -49,6 +53,11 @@ class ListRecordViewHolder(itemView: View?) : RecyclerView.ViewHolder(itemView!!
 
         recordDeleteButton.setOnClickListener {
             listRecordPresenter.deleteRecordFirestore(record,it.context)
+        }
+
+        recordContentFrameLayout.setOnClickListener {
+            val intent = KaraokeScreenActivity.newIntentRecord(it.context.applicationContext, record, KaraokeScreenActivity.MODE_RECORD)
+            it.context.startActivity(intent)
         }
 
     }

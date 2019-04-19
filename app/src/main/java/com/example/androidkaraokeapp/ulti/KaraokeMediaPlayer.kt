@@ -3,6 +3,7 @@ package com.example.androidkaraokeapp.ulti
 import android.annotation.SuppressLint
 import android.media.MediaPlayer
 import android.media.MediaRecorder
+import android.os.Handler
 import android.view.View
 import android.widget.ImageButton
 import android.widget.SeekBar
@@ -34,8 +35,7 @@ object KaraokeMediaPlayer {
     private var nextIndexKaraokeLyric:Int = 0
 
     private lateinit var playingMode:String
-
-
+    private lateinit var karaokeTrackingRunnable :Runnable
 
     private var karaokeLyric: MutableList<LyricModel> = mutableListOf()
 
@@ -63,14 +63,15 @@ object KaraokeMediaPlayer {
     private fun configureUI() {
         micImageButton = view.findViewById(R.id.mic_image_button)
         playImageButton = view.findViewById(R.id.play_image_button)
+
         nameSongTextView = view.findViewById(R.id.name_song_text_view)
         currentTextView = view.findViewById(R.id.current_text_view)
         durationTextView = view.findViewById(R.id.duration_text_view)
-
         lyricTopTextView = view.findViewById(R.id.lyric_top_text_view)
         lyricBotTextView = view.findViewById(R.id.lyric_bot_text_view)
 
         durationSeekBar = view.findViewById(R.id.duration_seek_bar)
+
 
         when (playingMode) {
             KaraokeScreenActivity.MODE_RECORD->{
@@ -100,8 +101,6 @@ object KaraokeMediaPlayer {
 
         }
 
-
-
         mediaPlayer.setOnCompletionListener {
             stop()
             mediaPlayerFinishListener?.finishActivity()
@@ -109,9 +108,8 @@ object KaraokeMediaPlayer {
     }
 
 
-
-    private fun startTrackingPositionMedia() {
-        Thread(Runnable {
+    private fun setupKaraokeTrackingRunnable() {
+        karaokeTrackingRunnable = Runnable {
             do {
                 try {
                     currentTextView.post {
@@ -134,7 +132,7 @@ object KaraokeMediaPlayer {
                             val nextLyric = karaokeLyric[nextIndexKaraokeLyric]
 
                             lyricBotTextView.text =  nextLyric.text
-                            lyricTopTextView.setKaraokeLyric(playingLyric, currentPlayPosition)
+                            lyricTopTextView.setKaraokeLyric(playingLyric, currentPlayPosition, mediaPlayer.isPlaying)
 
                         }
                     }
@@ -148,9 +146,12 @@ object KaraokeMediaPlayer {
                     ex.printStackTrace()
                 }
             } while (mediaPlayer.isPlaying)
+        }
+    }
 
-
-        }).start()
+    private fun startTrackingPositionMedia() {
+        setupKaraokeTrackingRunnable()
+        Thread(karaokeTrackingRunnable).start()
     }
 
     private fun findIndexPlayingLyric(currentPlayPosition:Int) {
@@ -221,21 +222,18 @@ object KaraokeMediaPlayer {
     //region method public
     fun init(mView: View, inputSong: SongModel, mode:String, listener: MediaPlayerFinishListener) {
         song = inputSong
-
         view = mView
         playingMode = mode
         mediaPlayerFinishListener = listener
+        isInit = true
 
         configureUI()
         prepare()
-
-        isInit = true
     }
 
     fun play() {
 
         mediaPlayer.seekTo(currentPlayPosition)
-
         mediaPlayer.start()
 
         if ( playingMode == KaraokeScreenActivity.MODE_KARAOKE) {
@@ -244,14 +242,12 @@ object KaraokeMediaPlayer {
 
         isPlaying = true
         isRecording = true
-
         startTrackingPositionMedia()
     }
 
     fun stop() {
         playImageButton.setImageResource(R.drawable.ic_play_arrow_black_36dp)
         currentPlayPosition = mediaPlayer.currentPosition
-
         mediaPlayer.stop()
 
         if ( playingMode == KaraokeScreenActivity.MODE_KARAOKE)
@@ -261,12 +257,30 @@ object KaraokeMediaPlayer {
 
         isPlaying = false
         isRecording = false
+    }
+
+    fun pause() {
+        //Using when in Recorded Mode
+//        karaokeTrackingThread.interrupt()
+        currentPlayPosition = mediaPlayer.currentPosition
+        isPlaying = false
+        lyricTopTextView.isRunning = isPlaying
+        mediaPlayer.pause()
+
+
+    }
+
+    fun resume() {
+        //Using when in Recorded Mode
+        mediaPlayer.seekTo(currentPlayPosition)
+        isPlaying = true
+        mediaPlayer.start()
+        nextIndexKaraokeLyric = -1
+        startTrackingPositionMedia()
 
     }
 
     fun saveRecord() {
-//        val record = RecordModel(song.id, song.name, "Duy",recordSavePath, song.thumbnail_url, 123213, currentCreateTime)
-//        val record = RecordModel(song.id,song.name, song.sub_url,"Duy Khá bảnh", recordSavePath,song.thumbnail_url,song.alias,currentCreateTime)
         val record = RecordModel(song.id,song.name,song.sub_url,song.thumbnail_url,song.alias,"Duy Khá bảnh", recordSavePath, currentCreateTime)
 
         recordFirebaseCollection.document(currentCreateTime.toString()).set(record)
@@ -300,4 +314,6 @@ object KaraokeMediaPlayer {
 
         isInit = false
     }
+
+    //endregion
 }
