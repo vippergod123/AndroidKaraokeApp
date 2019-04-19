@@ -54,7 +54,7 @@ class UserFragment: Fragment(),ListRecordContract.View  {
 
     override fun updateListRecord(removeRecord: RecordModel) {
         listRecord.remove(removeRecord)
-        this.listRecordRecyclerView.adapter = ListRecordRecyclerViewAdapter(listRecord,listRecordPresenter)
+        this.listRecordRecyclerView.adapter?.notifyDataSetChanged()
     }
     //region private method
     private fun configureUI (it:View) {

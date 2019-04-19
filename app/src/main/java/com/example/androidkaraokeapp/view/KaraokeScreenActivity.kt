@@ -4,26 +4,27 @@ import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
+import android.graphics.drawable.Drawable
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
+import android.support.v4.content.ContextCompat
 import android.util.Log
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
-import android.widget.Button
-import android.widget.FrameLayout
-import android.widget.ImageButton
-import android.widget.TextView
+import android.widget.*
 import com.example.androidkaraokeapp.R
 import com.example.androidkaraokeapp.model.LyricModel
 import com.example.androidkaraokeapp.model.RecordModel
 import com.example.androidkaraokeapp.model.SongModel
 import com.example.androidkaraokeapp.ulti.HandleDateTime
 import com.example.androidkaraokeapp.ulti.KaraokeMediaPlayer
+import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_recording_fullscreen.*
 import okhttp3.*
 import java.io.IOException
+import kotlin.random.Random
 
 
 class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlayerFinishListener {
@@ -178,6 +179,36 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
         mHideHandler.postDelayed(mHideRunnable, delayMillis.toLong())
     }
 
+    private fun setBackgroundEverySecond(duration:Long) {
+        val backgroundDrawable = arrayListOf(
+                                                            R.drawable.background_1,
+                                                            R.drawable.background_2,
+                                                            R.drawable.background_3,
+                                                            R.drawable.background_4,
+                                                            R.drawable.background_5)
+        var count = 1
+        Thread(Runnable {
+            do {
+                try {
+                    fullScreenContent.post {
+//                        Picasso.get().load(backgroundDrawable[count%3]).fit().into(background_image_view)
+                        fullScreenContent.setBackgroundResource(backgroundDrawable[count%5])
+                    }
+                    count++
+                    try {
+                        Thread.sleep(duration * 1000)
+                    } catch (e: InterruptedException) {
+                        e.printStackTrace()
+                    }
+                }
+                catch (ex: Exception) {
+                    ex.printStackTrace()
+                }
+            } while (KaraokeMediaPlayer.isPlaying)
+        }).start()
+    }
+
+
     //endregion
 
     //region private method
@@ -258,7 +289,7 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
                 false -> {
                     // media stop ->  play, pause icon
                     playImageButton.setImageResource(R.drawable.ic_pause_black_36dp)
-
+                    setBackgroundEverySecond(10)
                     if ( !KaraokeMediaPlayer.isInit ) {
                         loading_text_view.visibility = View.VISIBLE
                         fullScreenContentControl.visibility = View.INVISIBLE

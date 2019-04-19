@@ -69,6 +69,7 @@ class SearchActivity : AppCompatActivity(), ListSongContract.View {
         }
         songSingerFilterButton.setOnClickListener {
             songFilterTypeString = "singer"
+
             filterListSong(searchString)
         }
 
@@ -91,6 +92,11 @@ class SearchActivity : AppCompatActivity(), ListSongContract.View {
 
     private fun filterListSong(input:String) {
         searchString = input
+        val numberID = searchString.toIntOrNull()
+
+        val previouseSongFilterTypeString = songFilterTypeString
+        songFilterTypeString = if (numberID != null) "number_id" else previouseSongFilterTypeString
+
         val filteredMap: List<SongModel> = when (songFilterTypeString) {
             "name" -> listSong.filter {
                 val nameSong = HandleString().removeVietnameseUnicodeSymbol(it.name)
@@ -101,6 +107,10 @@ class SearchActivity : AppCompatActivity(), ListSongContract.View {
                 val singer = HandleString().removeVietnameseUnicodeSymbol(it.singer)
                 val singerSearch = HandleString().removeVietnameseUnicodeSymbol(searchString)
                 singer.contains(singerSearch)
+            }
+            "number_id" -> listSong.filter {
+                val id = it.id.toString()
+                id.contains(searchString)
             }
             else -> listSong.filter {
                 val nameSong = HandleString().removeVietnameseUnicodeSymbol(it.name)
