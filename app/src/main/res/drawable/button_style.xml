@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/common_google_signin_btn_icon_dark"
-    android:state_pressed="true" />
-    <item android:drawable="@drawable/common_google_signin_btn_icon_light_focused"
-    android:state_focused="true" />
-    <item android:drawable="@drawable/common_google_signin_btn_text_disabled"
+<selector xmlns:android="http://schemas.android.com/apk/res/android" android:exitFadeDuration="@android:integer/config_mediumAnimTime">
+    <!--<item android:color="#ffff0000"-->
+    <!--android:state_pressed="true" />-->
+    <!--<item android:drawable="@drawable/common_google_signin_btn_icon_light_focused"-->
+    <!--android:state_focused="true" />-->
+    <item android:drawable="@drawable/button_selected"
     android:state_selected="true"/>
 </selector>

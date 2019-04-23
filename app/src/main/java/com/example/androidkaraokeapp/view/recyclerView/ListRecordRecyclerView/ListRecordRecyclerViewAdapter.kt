@@ -29,4 +29,9 @@ class ListRecordRecyclerViewAdapter(private var listRecord: MutableList<RecordMo
         viewHolder.bind(record, listRecordPresenter)
     }
 
+    fun updateListRecord(listRecordFilterd: MutableList<RecordModel>) {
+        listRecord = listRecordFilterd
+        notifyDataSetChanged()
+    }
+
 }

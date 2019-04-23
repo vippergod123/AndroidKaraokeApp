@@ -79,10 +79,11 @@ class FavoriteSongFragment : Fragment(), ListSongContract.View {
         favoriteSongRecyclerView.layoutManager = LinearLayoutManager(activity)
         favoriteSongRecyclerView.adapter = ListSongRecyclerViewAdapter(listSong)
         favoriteSongAdapter = favoriteSongRecyclerView.adapter as ListSongRecyclerViewAdapter
+        favoriteSongAdapter.isVisibleFavoriteSongImageButton = false
 
         val itemTouchHelper = ItemTouchHelper(ItemTouchHelperCallback(favoriteSongAdapter, context))
         itemTouchHelper.attachToRecyclerView(favoriteSongRecyclerView)
-        favoriteSongAdapter.setVisibleFavoriteImageButton(false)
+
 
         searchFavoriteSongEditText.addTextChangedListener(object: TextWatcher {
             override fun afterTextChanged(s: Editable?) {
@@ -96,7 +97,7 @@ class FavoriteSongFragment : Fragment(), ListSongContract.View {
             }
 
         })
-        
+
     }
 
 

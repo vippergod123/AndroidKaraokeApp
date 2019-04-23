@@ -4,10 +4,12 @@ import android.annotation.SuppressLint
 import android.media.MediaPlayer
 import android.media.MediaRecorder
 import android.os.Handler
+import android.util.Log
 import android.view.View
 import android.widget.ImageButton
 import android.widget.SeekBar
 import android.widget.TextView
+import com.airbnb.lottie.LottieAnimationView
 import com.example.androidkaraokeapp.R
 import com.example.androidkaraokeapp.model.LyricModel
 import com.example.androidkaraokeapp.model.RecordModel
@@ -42,8 +44,8 @@ object KaraokeMediaPlayer {
     private lateinit var song: SongModel
     private lateinit var view: View
 
-    private lateinit var playImageButton: ImageButton
-    private lateinit var micImageButton: ImageButton
+    private lateinit var playImageButton: LottieAnimationView
+    private lateinit var micImageButton: LottieAnimationView
     private lateinit var nameSongTextView: TextView
     private lateinit var currentTextView: TextView
     private lateinit var durationTextView: TextView
@@ -72,6 +74,11 @@ object KaraokeMediaPlayer {
 
         durationSeekBar = view.findViewById(R.id.duration_seek_bar)
 
+        playImageButton.apply {
+            speed = -2.5f
+            useHardwareAcceleration(true)
+        }
+
 
         when (playingMode) {
             KaraokeScreenActivity.MODE_RECORD,KaraokeScreenActivity.MODE_KARAOKE_TEST->{
@@ -82,7 +89,6 @@ object KaraokeMediaPlayer {
                     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                         println("onProgressChanged")
                         currentPlayPosition = progress
-
                     }
                     override fun onStartTrackingTouch(seekBar: SeekBar?) {
                         println("onStartTrackingTouch")
@@ -97,7 +103,7 @@ object KaraokeMediaPlayer {
                 })
             }
             KaraokeScreenActivity.MODE_KARAOKE->{
-
+                durationSeekBar.setOnSeekBarChangeListener(null)
             }
 
         }
@@ -128,6 +134,10 @@ object KaraokeMediaPlayer {
                                 currentIndexKaraokeLyric ++
                             }
 
+                            if ( currentIndexKaraokeLyric == - 1) {
+                                currentIndexKaraokeLyric = karaokeLyric.size - 2
+                            }
+
                             nextIndexKaraokeLyric = currentIndexKaraokeLyric + 1
 
                             val playingLyric = karaokeLyric[currentIndexKaraokeLyric]
@@ -145,7 +155,7 @@ object KaraokeMediaPlayer {
                     }
                 }
                 catch (ex: Exception) {
-                    ex.printStackTrace()
+                    Log.d("Ex", ex.toString())
                 }
             } while (mediaPlayer.isPlaying)
         }
@@ -163,9 +173,7 @@ object KaraokeMediaPlayer {
         val temp = karaokeLyric.find {
             it.from <= currentPlayPosition && currentPlayPosition <= it.to
         }
-
         currentIndexKaraokeLyric = karaokeLyric.indexOf(temp)
-
     }
 
 
@@ -233,11 +241,13 @@ object KaraokeMediaPlayer {
         isInit = true
 
         configureUI()
+
         prepare()
     }
 
     fun play() {
-
+//        playImageButton.reverseAnimationSpeed()
+        playImageButtonAnimation()
         mediaPlayer.seekTo(currentPlayPosition)
         mediaPlayer.start()
 
@@ -251,7 +261,9 @@ object KaraokeMediaPlayer {
     }
 
     fun stop() {
-        playImageButton.setImageResource(R.drawable.ic_play_arrow_black_36dp)
+//        playImageButton.setImageResource(R.drawable.ic_play_arrow_black_36dp)
+//        playImageButton.playAnimation()
+        playImageButtonAnimation()
         currentPlayPosition = mediaPlayer.currentPosition
         mediaPlayer.stop()
 
@@ -267,6 +279,8 @@ object KaraokeMediaPlayer {
     fun pause() {
         //Using when in Recorded Mode
 //        karaokeTrackingThread.interrupt()
+//        playImageButton.frame = 30
+        playImageButtonAnimation()
         currentPlayPosition = mediaPlayer.currentPosition
         isPlaying = false
         lyricTopTextView.isRunning = isPlaying
@@ -277,6 +291,9 @@ object KaraokeMediaPlayer {
 
     fun resume() {
         //Using when in Recorded Mode
+//        playImageButton.frame = 30
+//        playImageButton.reverseAnimationSpeed()
+        playImageButtonAnimation()
         mediaPlayer.seekTo(currentPlayPosition)
         isPlaying = true
         mediaPlayer.start()
@@ -298,10 +315,8 @@ object KaraokeMediaPlayer {
     }
 
     fun abort() {
-
-        stop()
-       deleteRecordingSaveFile()
-
+            stop()
+            deleteRecordingSaveFile()
     }
 
 
@@ -312,16 +327,29 @@ object KaraokeMediaPlayer {
     fun reset() {
 
         currentPlayPosition = -1
-        currentCreateTime = -1
 
         currentIndexKaraokeLyric = -1
         nextIndexKaraokeLyric = 0
 
-        lyricTopTextView.isRunning = false
-        lyricTopTextView.visibility = View.INVISIBLE
-        lyricBotTextView.visibility = View.INVISIBLE
-        isInit = false
+        try {
+            lyricTopTextView.isRunning = false
+            lyricTopTextView.visibility = View.INVISIBLE
+            lyricBotTextView.visibility = View.INVISIBLE
+            isInit = false
+        }
+        catch (ex: Exception) {
+
+        }
     }
 
+    private fun playImageButtonAnimation(){
+        playImageButton.apply {
+            speed = -speed
+            setMinAndMaxFrame(0, 30)
+            if (!isAnimating) {
+                playAnimation()
+            }
+        }
+    }
     //endregion
 }

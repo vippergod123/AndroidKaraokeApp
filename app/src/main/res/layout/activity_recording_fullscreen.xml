@@ -104,23 +104,41 @@
                     app:layout_constraintTop_toTopOf="parent" android:layout_marginBottom="8dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/mic_image_button"
-                    android:layout_marginEnd="24dp" android:textColor="@android:color/white"
+                    android:textColor="@android:color/white"
                     android:fontFamily="sans-serif-medium"/>
-            <ImageButton
-                    app:srcCompat="@drawable/ic_mic_black_24dp"
+            <com.airbnb.lottie.LottieAnimationView
                     android:layout_width="0dp"
-                    android:layout_height="36dp"
+                    android:layout_height="84dp"
                     android:id="@+id/mic_image_button" android:layout_marginTop="8dp"
                     app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_marginBottom="8dp" app:layout_constraintEnd_toEndOf="parent"
-                    android:layout_marginEnd="24dp" android:background="@null"
-                    app:layout_constraintDimensionRatio="w,1:1"/>
+                    android:background="@null"
+                    app:layout_constraintDimensionRatio="w,1:1"
+                    app:lottie_autoPlay="false"
+                    app:lottie_loop="true"
+                    app:lottie_fileName="mic_recording.json" android:adjustViewBounds="true"/>
+
+            <!--<com.airbnb.lottie.LottieAnimationView-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_height="60dp"-->
+                    <!--android:layout_marginTop="8dp"-->
+                    <!--app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"-->
+                    <!--android:layout_marginBottom="8dp" app:layout_constraintEnd_toEndOf="parent"-->
+                    <!--android:layout_marginEnd="24dp" android:background="@null"-->
+                    <!--app:layout_constraintDimensionRatio="w,1:1"-->
+                    <!--app:lottie_autoPlay="false"-->
+                    <!--app:lottie_loop="true"-->
+                    <!--app:lottie_fileName="mic_recording.json"-->
+                    <!--android:id="@+id/mic_recording_image_button"/>-->
         </android.support.constraint.ConstraintLayout>
-        <ImageButton
-                app:srcCompat="@drawable/ic_play_arrow_black_36dp"
+        <com.airbnb.lottie.LottieAnimationView
+                android:background="@null"
+                app:layout_constraintDimensionRatio="w,1:1"
+                app:lottie_fileName="play_image_button.json"
                 android:layout_gravity="center"
-                android:layout_width="67dp"
-                android:layout_height="53dp" android:id="@+id/play_image_button" android:background="@null"/>
+                android:layout_width="84dp"
+                android:layout_height="84dp"
+                android:id="@+id/play_image_button" />
     </FrameLayout>
 
     <!-- This FrameLayout insets its children based on system windows using

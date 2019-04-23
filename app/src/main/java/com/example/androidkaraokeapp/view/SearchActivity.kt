@@ -18,9 +18,12 @@ import com.example.androidkaraokeapp.view.recyclerView.ListSongRecyclerView.List
 class SearchActivity : AppCompatActivity(), ListSongContract.View {
 
     private lateinit var searchView: SearchView
+
     private lateinit var searchRecyclerView: RecyclerView
+    private lateinit var recyclerViewAdapter: ListSongRecyclerViewAdapter
     private lateinit var songNameFilterButton: Button
     private lateinit var songSingerFilterButton: Button
+
     private var songFilterTypeString = "name"
 
     private var listSongPresenter = ListSongPresenter()
@@ -39,37 +42,56 @@ class SearchActivity : AppCompatActivity(), ListSongContract.View {
         listSongPresenter.fetchListSongFromFirestore(listSong)
     }
 
+    override fun onResume() {
+        super.onResume()
+        recyclerViewAdapter.isVisibleFavoriteSongImageButton = false
+    }
+
     override fun showListSong() {
-        this.searchRecyclerView.adapter =
-            ListSongRecyclerViewAdapter(listSong)
+        recyclerViewAdapter.notifyDataSetChanged()
     }
 
 
     private fun configureUI(){
         //find by ID
         searchRecyclerView = findViewById(R.id.search_recycler_view)
-        searchRecyclerView.layoutManager = LinearLayoutManager(this.applicationContext)
+        searchRecyclerView.layoutManager = LinearLayoutManager(this)
+        searchRecyclerView.adapter = ListSongRecyclerViewAdapter(listSong)
 
         searchView = findViewById(R.id.search_view)
         songSingerFilterButton = findViewById(R.id.song_singer_filter_button)
         songNameFilterButton = findViewById(R.id.song_name_filter_button)
 
         // Configure
+        recyclerViewAdapter = searchRecyclerView.adapter as ListSongRecyclerViewAdapter
+        recyclerViewAdapter.isVisibleFavoriteSongImageButton = false
+
         searchView.isFocusable = true
         searchView.setIconifiedByDefault(false)
         searchView.requestFocus()
+
+        songNameFilterButton.isSelected = true
+        songSingerFilterButton.isSelected = !songNameFilterButton.isSelected
 
     }
 
 
     private fun setViewListener(){
         songNameFilterButton.setOnClickListener {
+            if (songSingerFilterButton.isSelected) {
+                songNameFilterButton.isSelected = true
+                songSingerFilterButton.isSelected = false
+            }
             songFilterTypeString = "name"
             filterListSong(searchString)
         }
         songSingerFilterButton.setOnClickListener {
-            songFilterTypeString = "singer"
+            if (songNameFilterButton.isSelected) {
+                songSingerFilterButton.isSelected = true
+                songNameFilterButton.isSelected = false
+            }
 
+            songFilterTypeString = "singer"
             filterListSong(searchString)
         }
 
@@ -119,7 +141,6 @@ class SearchActivity : AppCompatActivity(), ListSongContract.View {
             }
         }
 
-        val recyclerViewAdapter = searchRecyclerView.adapter as ListSongRecyclerViewAdapter
         recyclerViewAdapter.updateListSong(filteredMap as MutableList<SongModel>)
     }
 }

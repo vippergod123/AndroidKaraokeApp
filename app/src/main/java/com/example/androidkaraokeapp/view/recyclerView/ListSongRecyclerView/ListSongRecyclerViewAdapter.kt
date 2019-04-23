@@ -17,7 +17,7 @@ import java.util.*
 
 class ListSongRecyclerViewAdapter(private var listSong:MutableList<SongModel>) : RecyclerView.Adapter<ListSongViewHolder>(), ItemTouchHelperListener {
     private var lastPosition  = -1
-    private var isVisibleFavoriteSongImageButton = true
+    var isVisibleFavoriteSongImageButton = true
 
 
     //#region override recyclerView
@@ -97,9 +97,6 @@ class ListSongRecyclerViewAdapter(private var listSong:MutableList<SongModel>) :
         notifyDataSetChanged()
     }
 
-    fun setVisibleFavoriteImageButton(visible:Boolean) {
-        isVisibleFavoriteSongImageButton = visible
-    }
 
     //#endregion
 }

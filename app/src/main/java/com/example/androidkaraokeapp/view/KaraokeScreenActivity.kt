@@ -15,6 +15,7 @@ import android.view.View
 import android.view.Window
 import android.view.WindowManager
 import android.widget.*
+import com.airbnb.lottie.LottieAnimationView
 import com.example.androidkaraokeapp.R
 import com.example.androidkaraokeapp.model.LyricModel
 import com.example.androidkaraokeapp.model.RecordModel
@@ -27,6 +28,8 @@ import okhttp3.*
 import java.io.IOException
 import kotlin.math.round
 import kotlin.random.Random
+import android.content.DialogInterface
+import android.app.AlertDialog
 
 
 class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlayerFinishListener {
@@ -38,8 +41,8 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
     private lateinit var nameSongTextView: TextView
     private lateinit var countDownTextView: TextView
     private lateinit var backImageButton: ImageButton
-    private lateinit var playImageButton: ImageButton
-    private lateinit var micImageButton: ImageButton
+    private lateinit var playImageButton: LottieAnimationView
+    private lateinit var micImageButton: LottieAnimationView
 
     private lateinit var fullScreenContent: FrameLayout
     private lateinit var fullScreenContentControl: FrameLayout
@@ -244,17 +247,18 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
         val request = Request.Builder().url(song.sub_url).build()
         val client = OkHttpClient()
 
+        if ( playingMode == MODE_RECORD)
+            micImageButton.visibility = View.INVISIBLE
+
         client.newCall(request).enqueue(object: Callback{
             override fun onFailure(call: Call, e: IOException) {
                 Log.d("Failed", "asd")
             }
-
             override fun onResponse(call: Call, response: Response) {
                 val  data = response.body()?.string()
                 runOnUiThread {
                     handleLyricStringToLyricModel(data)
                 }
-
             }
         })
     }
@@ -276,7 +280,8 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
                     // media playing ->  stop, play icon
 //                    KaraokeMediaPlayer.pause()
 
-                    playImageButton.setImageResource(R.drawable.ic_play_arrow_black_36dp)
+//                    playImageButton.setImageResource(R.drawable.ic_play_arrow_black_36dp)
+
                     when (playingMode) {
                         MODE_KARAOKE -> {
                             KaraokeMediaPlayer.stop()
@@ -292,7 +297,8 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
 
                 false -> {
                     // media stop ->  play, pause icon
-                    playImageButton.setImageResource(R.drawable.ic_pause_black_36dp)
+//                    playImageButton.setImageResource(R.drawable.ic_pause_black_36dp)
+//                    playImageButton.reverseAnimationSpeed()
                     setBackgroundEverySecond(10)
                     if ( !KaraokeMediaPlayer.isInit ) {
                         loading_text_view.visibility = View.VISIBLE
@@ -333,14 +339,19 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
         micImageButton.setOnClickListener {
             when (KaraokeMediaPlayer.isRecording) {
                 false -> {
+                    // stop ->  recording
+                    micImageButton.playAnimation()
+//                    playImageButton.setImageResource(R.drawable.ic_pause_black_36dp)
+
                     KaraokeMediaPlayer.playingMode = MODE_KARAOKE
                     playingMode = MODE_KARAOKE
-                    KaraokeMediaPlayer.reset()
+//                    KaraokeMediaPlayer.reset()
                     loading_text_view.visibility = View.VISIBLE
                     fullScreenContentControl.visibility = View.INVISIBLE
                     KaraokeHandler.postDelayed({
                         loading_text_view.visibility = View.INVISIBLE
                         KaraokeMediaPlayer.init(findViewById(android.R.id.content), song, playingMode, this)
+                        KaraokeMediaPlayer.reset()
                         countDownSeconds(4)
                         KaraokeHandler.postDelayed({
                             KaraokeMediaPlayer.play()
@@ -350,6 +361,8 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
                 }
                 true -> {
                     // recording ->  stop
+//                    playImageButton.setImageResource(R.drawable.ic_play_arrow_black_36dp)
+//                    playImageButton.reverseAnimationSpeed()
                     KaraokeMediaPlayer.stop()
                     if (playingMode == MODE_KARAOKE)
                         KaraokeMediaPlayer.saveRecord()
@@ -364,25 +377,42 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
     private fun abortKaraoke() {
         when( playingMode) {
             MODE_KARAOKE->{
-                val dialog = Dialog(this)
-                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-                dialog.setCancelable(false)
-                dialog.setContentView(R.layout.kaorake_abort_dialog)
+//                val dialog = Dialog(this)
+//                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+//                dialog.setCancelable(false)
+//                dialog.setContentView(R.layout.kaorake_abort_dialog)
+//
+//                val abortButton = dialog.findViewById(R.id.karaoke_abort_button) as Button
+//                val cancleButton = dialog.findViewById(R.id.karaoke_cancel_button) as Button
+//                cancleButton.setOnClickListener { dialog.dismiss() }
+//                abortButton.setOnClickListener{
+//                    KaraokeMediaPlayer.abort()
+//                    finish()
+//                }
+//                dialog.show()
+                val builder = AlertDialog.Builder(this)
 
-                val abortButton = dialog.findViewById(R.id.karaoke_abort_button) as Button
-                val cancleButton = dialog.findViewById(R.id.karaoke_cancel_button) as Button
-                cancleButton.setOnClickListener { dialog.dismiss() }
-                abortButton.setOnClickListener{
+                builder.setTitle("Đang thu âm bài hát")
+                builder.setMessage("Bạn vẫn muốn thoát khỏi trình thu âm?")
+
+                builder.setPositiveButton("Tiếp tục") { dialog, _ ->
+                    dialog.dismiss()
+                }
+
+                builder.setNegativeButton("Thoát") { dialog, _ ->
                     KaraokeMediaPlayer.abort()
                     finish()
                 }
-                dialog.show()
+                val alert = builder.create()
+                alert.show()
             }
             MODE_RECORD, MODE_KARAOKE_TEST-> {
                 KaraokeMediaPlayer.abort()
                 finish()
             }
         }
+
+
 
     }
 
