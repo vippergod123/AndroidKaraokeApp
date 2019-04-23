@@ -11,7 +11,7 @@
     <ImageView
             android:layout_width="160dp"
             android:layout_height="90dp" app:srcCompat="@mipmap/ic_launcher"
-            android:id="@+id/song_thumbnail_image_view"
+            android:id="@+id/record_image_view"
             android:layout_gravity="start|center"
             android:layout_marginRight="10dp"
 
@@ -43,7 +43,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     android:layout_marginEnd="8dp"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/song_thumbnail_image_view"/>
+                    app:layout_constraintStart_toEndOf="@+id/record_image_view"/>
             <TextView
                     android:text="MS: 21382104"
                     android:ellipsize="end"

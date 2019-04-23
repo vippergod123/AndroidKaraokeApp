@@ -1,7 +1,6 @@
 package com.example.androidkaraokeapp.view.recyclerView.ListSongRecyclerView
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.widget.ImageButton
@@ -17,9 +16,6 @@ import android.util.Log
 import com.example.androidkaraokeapp.ulti.FirestoreUlti
 import com.example.androidkaraokeapp.ulti.Handle_UI
 import com.example.androidkaraokeapp.view.MainActivity
-import android.os.Bundle
-
-
 
 
 class ListSongViewHolder(itemView: View?) : RecyclerView.ViewHolder(itemView!!), ListSongDialogFragment.ListSongDialogFragmentListener{
@@ -28,7 +24,7 @@ class ListSongViewHolder(itemView: View?) : RecyclerView.ViewHolder(itemView!!),
     private val songSingerTextView = itemView?.findViewById(R.id.song_singer_text_view) as TextView
     private val songIdTextView = itemView?.findViewById(R.id.song_id_text_view) as TextView
     private val favoriteSongImageButton = itemView?.findViewById(R.id.favorite_song_image_button) as ImageButton
-    private val songThumbnailImageView = itemView?.findViewById<ImageView>(R.id.song_thumbnail_image_view)
+    private val songThumbnailImageView = itemView?.findViewById<ImageView>(R.id.record_image_view)
 
     private lateinit var dialog : ListSongDialogFragment
 

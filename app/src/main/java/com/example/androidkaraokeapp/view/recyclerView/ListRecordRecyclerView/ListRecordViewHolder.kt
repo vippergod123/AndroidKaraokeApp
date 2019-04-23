@@ -3,35 +3,28 @@ package com.example.androidkaraokeapp.view.recyclerView.ListRecordRecyclerView
 import android.annotation.SuppressLint
 import android.support.v7.widget.RecyclerView
 import android.view.View
-import android.widget.ImageView
-import android.widget.TextView
 
 import com.example.androidkaraokeapp.R
 import com.example.androidkaraokeapp.model.RecordModel
 import android.media.MediaMetadataRetriever
-import android.widget.Button
-import android.widget.FrameLayout
-import com.example.androidkaraokeapp.presenter.ListRecordContract
+import android.widget.*
 import com.example.androidkaraokeapp.presenter.ListRecordPresenter
 import com.example.androidkaraokeapp.ulti.HandleDateTime
-import com.example.androidkaraokeapp.ulti.Handle_UI
 import com.example.androidkaraokeapp.view.KaraokeScreenActivity
 import com.squareup.picasso.Picasso
-import java.io.File
 
 
 class ListRecordViewHolder(itemView: View?) : RecyclerView.ViewHolder(itemView!!)  {
     private val recordSongNameTextView = itemView?.findViewById(R.id.record_song_name_text_view) as TextView
     private val recordUserNameTextView = itemView?.findViewById(R.id.record_user_name_text_view) as TextView
     private val recordDurationTextView = itemView?.findViewById(R.id.record_duration_text_view) as TextView
-    private val recordDeleteButton = itemView?.findViewById(R.id.record_delete_button) as Button
-    private val recordContentFrameLayout = itemView?.findViewById(R.id.record_content_frame_layout) as FrameLayout
+    private val recordContentLinearLayout = itemView?.findViewById(R.id.record_content_linear_layout) as LinearLayout
 
 
     private val recordImageView = itemView?.findViewById(R.id.record_image_view) as ImageView
 
     @SuppressLint("SetTextI18n")
-    fun bind (record:RecordModel, listRecordPresenter: ListRecordPresenter) {
+    fun bind (record:RecordModel ) {
         recordSongNameTextView.text = record.name
         val createTime = HandleDateTime.miliSecondToDateFormat(record.create_time, "dd/MM/yyyy hh:mm")
         recordUserNameTextView.text = "${record.user} - $createTime"
@@ -51,11 +44,7 @@ class ListRecordViewHolder(itemView: View?) : RecyclerView.ViewHolder(itemView!!
         }
         Picasso.get().load(record.thumbnail_url).into(recordImageView)
 
-        recordDeleteButton.setOnClickListener {
-            listRecordPresenter.deleteRecordFirestore(record,it.context)
-        }
-
-        recordContentFrameLayout.setOnClickListener {
+        recordContentLinearLayout.setOnClickListener {
             val intent = KaraokeScreenActivity.newIntentRecord(it.context.applicationContext, record, KaraokeScreenActivity.MODE_RECORD)
             it.context.startActivity(intent)
         }

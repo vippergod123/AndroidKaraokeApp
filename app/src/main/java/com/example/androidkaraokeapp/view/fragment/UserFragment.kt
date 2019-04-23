@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.helper.ItemTouchHelper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
@@ -17,6 +18,7 @@ import com.example.androidkaraokeapp.model.RecordModel
 import com.example.androidkaraokeapp.presenter.ListRecordContract
 import com.example.androidkaraokeapp.presenter.ListRecordPresenter
 import com.example.androidkaraokeapp.ulti.HandleString
+import com.example.androidkaraokeapp.ulti.ItemTouchHelperCallback
 import com.example.androidkaraokeapp.view.recyclerView.ListRecordRecyclerView.ListRecordRecyclerViewAdapter
 
 class UserFragment: Fragment(),ListRecordContract.View  {
@@ -74,6 +76,9 @@ class UserFragment: Fragment(),ListRecordContract.View  {
         listRecordRecyclerView.layoutManager = LinearLayoutManager(activity)
         listRecordRecyclerView.adapter =  ListRecordRecyclerViewAdapter(listRecord, listRecordPresenter)
         listRecordAdapter = listRecordRecyclerView.adapter as ListRecordRecyclerViewAdapter
+
+        val itemTouchHelper = ItemTouchHelper(ItemTouchHelperCallback(listRecordAdapter, context))
+        itemTouchHelper.attachToRecyclerView(listRecordRecyclerView)
 
         //        Add divider to viewholder
         val dividerItemDecoration = DividerItemDecoration(context!!, LinearLayoutManager.VERTICAL)

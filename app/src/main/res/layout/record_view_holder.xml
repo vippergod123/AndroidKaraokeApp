@@ -3,59 +3,61 @@
               xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
               android:layout_width="match_parent"
               android:layout_height="wrap_content" android:orientation="vertical"
-              android:background="@color/gray">
+>
 
 
-    <FrameLayout
+    <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:id="@+id/record_content_frame_layout">
+            android:layout_height="match_parent"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:orientation="horizontal" android:id="@+id/record_content_linear_layout">
+
         <ImageView
-                android:layout_width="match_parent"
-                android:layout_gravity="center"
-                android:layout_height="180dp" app:srcCompat="@drawable/ic_launcher_background"
-                android:id="@+id/record_image_view" android:scaleType="fitXY"/>
-        <android.support.constraint.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_gravity="bottom"
-                android:layout_height="80dp" android:background="@android:drawable/screen_background_dark_transparent">
+                android:layout_width="160dp"
+                android:layout_height="90dp" app:srcCompat="@mipmap/ic_launcher"
+                android:id="@+id/record_image_view"
+                android:layout_gravity="start|center"
+                android:layout_marginRight="10dp"
 
-            <TextView
-                    android:text="Chạm khẽ tym anh 1 chút hoy"
-                    android:layout_width="0dp"
-                    android:ellipsize="end"
-                    android:singleLine="true"
-                    android:layout_height="wrap_content" android:id="@+id/record_song_name_text_view"
-                    android:layout_gravity="center|bottom"
-                    android:textColor="@android:color/white"
-                    android:alpha="1"
-                    android:layout_marginTop="14dp"
-                    app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent"
-                    android:layout_marginStart="20dp" android:fontFamily="sans-serif-medium"
-                    android:layout_marginEnd="8dp" app:layout_constraintEnd_toEndOf="parent"/>
-            <TextView
-                    android:text="User: Duy Truong"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/record_user_name_text_view"
-                    android:fontFamily="sans-serif" android:textColor="@android:color/white"
-                    app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="20dp"
-                    app:layout_constraintTop_toBottomOf="@+id/record_song_name_text_view"
-                    android:layout_marginTop="14dp" android:textAlignment="viewStart"/>
-            <TextView
-                    android:text="Thời gian: Nan"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/record_duration_text_view" android:layout_marginEnd="20dp"
-                    app:layout_constraintEnd_toEndOf="parent" app:layout_constraintBottom_toBottomOf="parent"
-                    android:layout_marginBottom="14dp" android:textColor="@android:color/white"
-                    android:textAlignment="textEnd"/>
-        </android.support.constraint.ConstraintLayout>
-
-    </FrameLayout>
-    <Button
-            android:text="Xóa"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:id="@+id/record_delete_button"
-            android:background="@color/light_orange" android:fontFamily="sans-serif-medium" android:textSize="16sp"
-            android:textAlignment="center" android:textColor="@android:color/white"/>
+                android:layout_weight="1"/>
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" android:layout_weight="1">
+            <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_marginTop="5dp"
+                    android:layout_height="match_parent" android:layout_weight="1">
+                <TextView
+                        android:text="Cham Khe tym anh mot trut hoy"
+                        android:ellipsize="end"
+                        android:singleLine="true"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:id="@+id/record_song_name_text_view"
+                        android:layout_weight="1"
+                        android:textSize="20sp" android:textStyle="bold"/>
+                <TextView
+                        android:text="Thịnh Nụ"
+                        android:ellipsize="end"
+                        android:singleLine="true"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/record_duration_text_view"
+                        android:layout_weight="1"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        android:layout_marginEnd="8dp"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toEndOf="@+id/record_image_view"/>
+                <TextView
+                        android:text="MS: 21382104"
+                        android:ellipsize="end"
+                        android:singleLine="true"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:id="@+id/record_user_name_text_view"
+                        android:layout_weight="1" android:textSize="12sp"/>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
 </LinearLayout>

@@ -79,7 +79,7 @@ class ListSongRecyclerViewAdapter(private var listSong:MutableList<SongModel>) :
 
     //#endregion
 
-    //#region private Method
+    //#region private Method animation
 
     private fun setAnimation(viewToAnimate: View, position: Int) {
         if (position > lastPosition) {
@@ -96,8 +96,7 @@ class ListSongRecyclerViewAdapter(private var listSong:MutableList<SongModel>) :
         listSong = listSongFiltered
         notifyDataSetChanged()
     }
-
-
     //#endregion
+
 }
 
