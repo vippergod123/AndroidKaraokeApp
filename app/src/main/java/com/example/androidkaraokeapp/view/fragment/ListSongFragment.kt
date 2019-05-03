@@ -3,6 +3,7 @@ package com.example.androidkaraokeapp.view.fragment
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -25,6 +26,9 @@ class ListSongFragment : Fragment(), ListSongContract.View {
     private lateinit var searchTextView : TextView
     private var listSong: MutableList<SongModel> = mutableListOf()
     private lateinit var listSongAdapter :ListSongRecyclerViewAdapter
+
+    private var page = 1
+    private var loading = true
 
     companion object {
         @SuppressLint("StaticFieldLeak")
@@ -49,14 +53,14 @@ class ListSongFragment : Fragment(), ListSongContract.View {
         super.onActivityCreated(savedInstanceState)
         view?.let {
             configureUI(it)
-
+            listSongPresenter.fetchListSongFromFirestore(listSong, page)
         }
     }
     //endregion
 
     //region Override system
     override fun showListSong() {
-        this.listSongRecyclerView.adapter = ListSongRecyclerViewAdapter(listSong)
+        listSongRecyclerView.adapter!!.notifyDataSetChanged()
     }
     //endregion
 
@@ -68,16 +72,38 @@ class ListSongFragment : Fragment(), ListSongContract.View {
         listSongRecyclerView.adapter = ListSongRecyclerViewAdapter(listSong)
         listSongAdapter = listSongRecyclerView.adapter as ListSongRecyclerViewAdapter
 
-        listSongPresenter.fetchListSongFromFirestore(listSong)
+        setupListener()
+        setupPresenter()
+    }
 
+    private fun setupListener() {
         searchTextView.setOnClickListener {
             val intent = Intent(it.context, SearchActivity::class.java)
-// To pass any data to next activity
-//            intent.putExtra(INTENT_LIST_SONG, listSong)
-// start your next activity
             startActivity(intent)
         }
-        setupPresenter()
+
+
+        listSongRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                val mLayoutManager = listSongRecyclerView.layoutManager as LinearLayoutManager
+                if (dy > 0) {
+                    val visibleItemCount = mLayoutManager.childCount
+                    val totalItemCount = mLayoutManager.itemCount
+                    val pastVisibleItems = mLayoutManager.findFirstVisibleItemPosition()
+
+                    if (loading && page <= 3) {
+                        if ((visibleItemCount + pastVisibleItems) >= totalItemCount) {
+                            loading = false
+                            page++
+                            listSongPresenter.fetchListSongFromFirestore(listSong, page)
+                            Handler().postDelayed({
+                                loading = true
+                            },200)
+                        }
+                    }
+                }
+            }
+        })
     }
     private fun setupPresenter() {
         listSongPresenter.setView(this)

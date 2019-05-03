@@ -25,6 +25,7 @@ class SearchActivity : AppCompatActivity(), ListSongContract.View {
     private lateinit var songSingerFilterButton: Button
 
     private var songFilterTypeString = "name"
+    private var page = 100
 
     private var listSongPresenter = ListSongPresenter()
     private lateinit var searchTextView : TextView
@@ -39,7 +40,7 @@ class SearchActivity : AppCompatActivity(), ListSongContract.View {
         setViewListener()
         setupPresenter()
 
-        listSongPresenter.fetchListSongFromFirestore(listSong)
+        listSongPresenter.fetchListSongFromFirestore(listSong,page)
     }
 
     override fun onResume() {
@@ -116,8 +117,12 @@ class SearchActivity : AppCompatActivity(), ListSongContract.View {
         searchString = input
         val numberID = searchString.toIntOrNull()
 
-        val previouseSongFilterTypeString = songFilterTypeString
-        songFilterTypeString = if (numberID != null) "number_id" else previouseSongFilterTypeString
+
+        songFilterTypeString = if (songSingerFilterButton.isSelected) "name" else "singer"
+
+        if (numberID != null)
+            songFilterTypeString = "number_id"
+
 
         val filteredMap: List<SongModel> = when (songFilterTypeString) {
             "name" -> listSong.filter {

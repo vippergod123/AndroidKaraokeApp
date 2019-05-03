@@ -9,7 +9,6 @@ import com.example.androidkaraokeapp.R
 import com.example.androidkaraokeapp.model.SongModel
 import com.example.androidkaraokeapp.ulti.FirestoreUlti
 import com.example.androidkaraokeapp.ulti.ItemTouchHelperListener
-import com.example.androidkaraokeapp.view.dialog.ListSongDialogFragment
 import kotlinx.android.synthetic.main.list_song_view_holder.view.*
 import java.util.*
 
@@ -33,8 +32,8 @@ class ListSongRecyclerViewAdapter(private var listSong:MutableList<SongModel>) :
     override fun onBindViewHolder(viewHolder: ListSongViewHolder, position: Int) {
         val song = listSong[position]
         viewHolder.bind(song)
-        if (isVisibleFavoriteSongImageButton )
-            viewHolder.setupFavoriteImageButton(song)
+        if (isVisibleFavoriteSongImageButton)
+            viewHolder.setupFavoriteImageButton()
         else
             viewHolder.itemView.favorite_song_image_button.visibility = View.INVISIBLE
 
@@ -45,6 +44,7 @@ class ListSongRecyclerViewAdapter(private var listSong:MutableList<SongModel>) :
         super.onViewAttachedToWindow(holder)
         holder.itemView.clearAnimation()
     }
+
     //#endregion
 
     //#region item touch helper
@@ -65,16 +65,10 @@ class ListSongRecyclerViewAdapter(private var listSong:MutableList<SongModel>) :
     override fun onItemDismiss(viewHolder: RecyclerView.ViewHolder, position: Int) {
 
         val dismissSong = listSong[position]
-        val favSongCollection = FirestoreUlti.getInstance().db.collection(FirestoreUlti.Collection_Favorite_Song)
+        val songCollection = FirestoreUlti.getInstance().db.collection(FirestoreUlti.Collection_SONG)
         listSong.removeAt(position)
         notifyItemRemoved(position)
-        favSongCollection.document(dismissSong.id.toString()).delete()
-        .addOnSuccessListener {
-//            listSong.removeAt(position)
-
-        }
-        .addOnFailureListener {  }
-
+        songCollection.document(dismissSong.id.toString()).update("isLiked", false)
     }
 
     //#endregion

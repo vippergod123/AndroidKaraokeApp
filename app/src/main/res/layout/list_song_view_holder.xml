@@ -52,13 +52,22 @@
                     android:layout_height="wrap_content" android:id="@+id/song_id_text_view"
                     android:layout_weight="1" android:textSize="12sp"/>
         </LinearLayout>
-        <ImageButton
-                android:layout_width="50dp"
-                android:layout_height="wrap_content"
-                app:srcCompat="@drawable/ic_dot_menu_30dp"
-                android:layout_gravity="start|center"
+        <!--<ImageButton-->
+                <!--android:layout_width="50dp"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--app:srcCompat="@drawable/ic_dot_menu_30dp"-->
+                <!--android:layout_gravity="start|center"-->
+                <!--android:background="@null"-->
+                <!--android:id="@+id/favorite_song_image_button"-->
+        <!--/>-->
+
+        <com.airbnb.lottie.LottieAnimationView
                 android:background="@null"
-                android:id="@+id/favorite_song_image_button"
-        />
+                app:layout_constraintDimensionRatio="w,1:1"
+                app:lottie_fileName="favorite_song_image_button.json"
+                android:layout_gravity="center"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:id="@+id/favorite_song_image_button" />
     </LinearLayout>
 </LinearLayout>

@@ -6,7 +6,7 @@ import com.example.androidkaraokeapp.model.SongModel
 
 interface ListSongContract {
     interface Presenter {
-        fun fetchListSongFromFirestore(listSong: MutableList<SongModel>)
+        fun fetchListSongFromFirestore(listSong: MutableList<SongModel>, page:Int)
         fun fetchFavoriteSongFromFirestore(listSong: MutableList<SongModel>)
 
         fun addToFavorite ( song: SongModel)
