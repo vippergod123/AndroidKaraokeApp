@@ -118,7 +118,7 @@ class SearchActivity : AppCompatActivity(), ListSongContract.View {
         val numberID = searchString.toIntOrNull()
 
 
-        songFilterTypeString = if (songSingerFilterButton.isSelected) "name" else "singer"
+        songFilterTypeString = if (songNameFilterButton.isSelected) "name" else "singer"
 
         if (numberID != null)
             songFilterTypeString = "number_id"
