@@ -23,7 +23,11 @@ import android.view.View
 import com.example.androidkaraokeapp.model.RecordModel
 import com.example.androidkaraokeapp.presenter.ListRecordContract
 import com.example.androidkaraokeapp.presenter.ListRecordPresenter
+import com.example.androidkaraokeapp.ulti.HandleDiskLRUCache
+import com.example.androidkaraokeapp.ulti.HandleDiskLRUCache.getSizeAudioCacheFolder
+import com.example.androidkaraokeapp.ulti.Handle_UI
 import com.example.androidkaraokeapp.view.recyclerView.ListRecordRecyclerView.ListRecordRecyclerViewAdapter
+import java.io.File
 
 
 @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
@@ -78,6 +82,11 @@ class PrepareSongActivity : AppCompatActivity(), ListRecordContract.View {
         val backGroundTask = CalculateDurationSong(song.mp3_url, callBack  = {
             songDurationTextView.text = "Thời gian: $it"
         })
+
+        val backgroundDownloadTask = HandleDiskLRUCache.DownloadSongAudioAsynctask(song,callBack = {
+
+        })
+        backgroundDownloadTask.execute()
         backGroundTask.execute()
 
     }
@@ -110,15 +119,14 @@ class PrepareSongActivity : AppCompatActivity(), ListRecordContract.View {
 
         songNameTextView.text = song.name
         userSingTextView.text = "Singer: ${song.singer}"
+
         Picasso.get().load(song.thumbnail_url).fit().into(thumbnailImageView)
-
-
 
         listShortRecordRecyclerView.layoutManager = LinearLayoutManager(this.applicationContext)
         listShortRecordRecyclerView.adapter =  ListShortRecordRecyclerViewAdapter(listRecord)
         listRecordAdapter = listShortRecordRecyclerView.adapter as ListShortRecordRecyclerViewAdapter
 
-        //        Add divider to viewholder
+        //        Add divider to view holder
         val dividerItemDecoration = DividerItemDecoration(this.applicationContext, LinearLayoutManager.VERTICAL)
         dividerItemDecoration.setDrawable(this.applicationContext.resources.getDrawable(R.drawable.divider_recycler_view))
         listShortRecordRecyclerView.addItemDecoration(dividerItemDecoration)

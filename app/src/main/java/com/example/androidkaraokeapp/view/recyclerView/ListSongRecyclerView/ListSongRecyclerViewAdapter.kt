@@ -8,6 +8,7 @@ import android.view.animation.AnimationUtils
 import com.example.androidkaraokeapp.R
 import com.example.androidkaraokeapp.model.SongModel
 import com.example.androidkaraokeapp.ulti.FirestoreUlti
+import com.example.androidkaraokeapp.ulti.HandleDiskLRUCache
 import com.example.androidkaraokeapp.ulti.ItemTouchHelperListener
 import kotlinx.android.synthetic.main.list_song_view_holder.view.*
 import java.util.*
@@ -68,7 +69,9 @@ class ListSongRecyclerViewAdapter(private var listSong:MutableList<SongModel>) :
         val songCollection = FirestoreUlti.getInstance().db.collection(FirestoreUlti.Collection_SONG)
         listSong.removeAt(position)
         notifyItemRemoved(position)
-        songCollection.document(dismissSong.id.toString()).update("isLiked", false)
+        songCollection.document(dismissSong.id.toString()).update("isLiked", false).addOnCompleteListener {
+
+        }
     }
 
     //#endregion

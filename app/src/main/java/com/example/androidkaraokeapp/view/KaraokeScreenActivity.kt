@@ -30,6 +30,7 @@ import kotlin.math.round
 import kotlin.random.Random
 import android.content.DialogInterface
 import android.app.AlertDialog
+import com.example.androidkaraokeapp.ulti.HandleDiskLRUCache
 
 
 class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlayerFinishListener {
@@ -353,6 +354,11 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
                         KaraokeMediaPlayer.init(findViewById(android.R.id.content), song, playingMode, this)
                         KaraokeMediaPlayer.reset()
                         countDownSeconds(4)
+                        if ( song.isLiked ){
+                            HandleDiskLRUCache.DownloadSongAudioAsynctask(song,callBack = {
+                                Log.d("cache audio", "cache success")
+                            })
+                        }
                         KaraokeHandler.postDelayed({
                             KaraokeMediaPlayer.play()
                         },5500)
@@ -486,6 +492,7 @@ class KaraokeScreenActivity : AppCompatActivity(), KaraokeMediaPlayer.MediaPlaye
                 countDownTextView.text = round(millisUntilFinished.toFloat()/1000).toInt().toString()
             }
 
+            @SuppressLint("SetTextI18n")
             override fun onFinish() {
                 countDownTextView.text = "Bắt đầu thu..."
                 KaraokeHandler.postDelayed({countDownTextView.visibility = View.INVISIBLE}, 1000)

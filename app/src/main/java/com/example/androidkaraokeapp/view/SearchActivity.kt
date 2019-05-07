@@ -14,6 +14,7 @@ import com.example.androidkaraokeapp.presenter.ListSongContract
 import com.example.androidkaraokeapp.presenter.ListSongPresenter
 import com.example.androidkaraokeapp.ulti.HandleString
 import com.example.androidkaraokeapp.view.recyclerView.ListSongRecyclerView.ListSongRecyclerViewAdapter
+import java.util.regex.Pattern
 
 class SearchActivity : AppCompatActivity(), ListSongContract.View {
 
@@ -27,8 +28,9 @@ class SearchActivity : AppCompatActivity(), ListSongContract.View {
     private var songFilterTypeString = "name"
     private var page = 100
 
+
+
     private var listSongPresenter = ListSongPresenter()
-    private lateinit var searchTextView : TextView
     private var listSong: MutableList<SongModel> = mutableListOf()
 
     private var searchString = ""
@@ -123,6 +125,9 @@ class SearchActivity : AppCompatActivity(), ListSongContract.View {
         if (numberID != null)
             songFilterTypeString = "number_id"
 
+        if (!input.contains(" ") && songFilterTypeString == "name" && input != "")
+            songFilterTypeString = "name_shortcut"
+
 
         val filteredMap: List<SongModel> = when (songFilterTypeString) {
             "name" -> listSong.filter {
@@ -138,6 +143,16 @@ class SearchActivity : AppCompatActivity(), ListSongContract.View {
             "number_id" -> listSong.filter {
                 val id = it.id.toString()
                 id.contains(searchString)
+            }
+            "name_shortcut" -> listSong.filter {
+                val splitName = it.name.split(" ")
+                var firstCharInName = ""
+                splitName.forEach { word ->
+                    firstCharInName+= word[0].toLowerCase()
+                }
+                firstCharInName = HandleString().removeVietnameseUnicodeSymbol(firstCharInName)
+                val inputSearch = HandleString().removeVietnameseUnicodeSymbol(input)
+                firstCharInName.contains(inputSearch)
             }
             else -> listSong.filter {
                 val nameSong = HandleString().removeVietnameseUnicodeSymbol(it.name)

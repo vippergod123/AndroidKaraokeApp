@@ -1,7 +1,6 @@
 package com.example.androidkaraokeapp.view.recyclerView.ListSongRecyclerView
 
 import android.annotation.SuppressLint
-import android.os.Handler
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.widget.ImageView
@@ -9,7 +8,6 @@ import android.widget.TextView
 import com.example.androidkaraokeapp.R
 import com.example.androidkaraokeapp.model.SongModel
 import com.example.androidkaraokeapp.ulti.RoundedTransformation
-import com.example.androidkaraokeapp.view.dialog.ListSongDialogFragment
 import com.example.androidkaraokeapp.view.PrepareSongActivity
 import com.squareup.picasso.Picasso
 import com.airbnb.lottie.LottieAnimationView

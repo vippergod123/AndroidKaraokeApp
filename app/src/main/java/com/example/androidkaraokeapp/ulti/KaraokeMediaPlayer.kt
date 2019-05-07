@@ -79,7 +79,6 @@ object KaraokeMediaPlayer {
             useHardwareAcceleration(true)
         }
 
-
         when (playingMode) {
             KaraokeScreenActivity.MODE_RECORD,KaraokeScreenActivity.MODE_KARAOKE_TEST->{
                 if (playingMode == KaraokeScreenActivity.MODE_RECORD)
@@ -192,6 +191,8 @@ object KaraokeMediaPlayer {
 
         val folderSavePath = view.context.applicationContext.filesDir.path + "/record"
         val file = File(folderSavePath)
+        if ( !file.exists())
+            file.mkdir()
 
         currentCreateTime = System.currentTimeMillis()
         recordSavePath = "/${"Duy"}_${song.id}_${song.alias}_$currentCreateTime.mp3"
@@ -200,6 +201,13 @@ object KaraokeMediaPlayer {
         var pathSource = song.mp3_url
         if ( playingMode == KaraokeScreenActivity.MODE_RECORD)
             pathSource = file.path + (song as RecordModel).record_url
+        else {
+            val songInCache  = HandleDiskLRUCache.songPathInCacheFolder(song.id)
+            if ( songInCache != null )
+                pathSource = songInCache
+        }
+
+
         mediaPlayer.setDataSource(pathSource)
         mediaPlayer.prepare()
 

@@ -1,25 +1,31 @@
 package com.example.androidkaraokeapp.view
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Environment
+import android.os.Environment.isExternalStorageRemovable
 import android.support.design.widget.BottomNavigationView
 import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import com.example.androidkaraokeapp.R
-import com.example.androidkaraokeapp.ulti.HandleMemoryStorage
+import com.example.androidkaraokeapp.ulti.HandleDiskLRUCache
 import com.example.androidkaraokeapp.view.fragment.FavoriteSongFragment
 import com.example.androidkaraokeapp.view.fragment.ListSongFragment
 import com.example.androidkaraokeapp.view.fragment.UserFragment
 import kotlinx.android.synthetic.main.activity_main.*
+import java.io.File
+import android.graphics.drawable.BitmapDrawable
 
 
 class MainActivity : AppCompatActivity() {
 
     private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
-        val fragment: Fragment =  when (item.itemId) {
+        val fragment: Fragment = when (item.itemId) {
             R.id.navigation_song -> ListSongFragment()
             R.id.navigation_favorite -> FavoriteSongFragment()
             R.id.navigation_user -> UserFragment()
@@ -37,20 +43,30 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         supportFragmentManager.beginTransaction().replace(R.id.fragment_container, ListSongFragment()).commit()
 
-        configureSaveMemory()
+
 
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
 
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            val permissions = arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
-            ActivityCompat.requestPermissions(this, permissions,0)
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.RECORD_AUDIO
+            ) != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            val permissions = arrayOf(
+                Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            )
+            ActivityCompat.requestPermissions(this, permissions, 0)
         }
+        configureDiskLRUCache()
     }
 
-    private fun configureSaveMemory() {
-        val folderName = HandleMemoryStorage.getInstance().faveSongFolderName
-//        HandleMemoryStorage.getInstance().createFolder(folderName,this.applicationContext)
+    private fun configureDiskLRUCache() {
+        HandleDiskLRUCache.initDiskLRUCache(this)
     }
+
 }
