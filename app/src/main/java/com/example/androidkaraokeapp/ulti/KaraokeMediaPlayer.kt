@@ -3,10 +3,8 @@ package com.example.androidkaraokeapp.ulti
 import android.annotation.SuppressLint
 import android.media.MediaPlayer
 import android.media.MediaRecorder
-import android.os.Handler
 import android.util.Log
 import android.view.View
-import android.widget.ImageButton
 import android.widget.SeekBar
 import android.widget.TextView
 import com.airbnb.lottie.LottieAnimationView
@@ -33,8 +31,9 @@ object KaraokeMediaPlayer {
     private var currentPlayPosition: Int = -1
     private var currentCreateTime:Long = -1
 
-    private var currentIndexKaraokeLyric:Int = -1
+    private var currentIndexKaraokeLyric:Int = 0
     private var nextIndexKaraokeLyric:Int = 0
+    private var switchlyricTextViewPlaying = "Top"
 
     lateinit var playingMode:String
     private lateinit var karaokeTrackingRunnable :Runnable
@@ -51,7 +50,8 @@ object KaraokeMediaPlayer {
     private lateinit var durationTextView: TextView
     private lateinit var durationSeekBar: SeekBar
     private lateinit var lyricTopTextView: LyricTextView
-    private lateinit var lyricBotTextView: TextView
+//    private lateinit var lyricBotTextView: TextView
+    private lateinit var lyricBotTextView: LyricTextView
 
     private val recordFirebaseCollection = FirestoreUlti.getInstance().db.collection(FirestoreUlti.Collection_Record)
 
@@ -97,6 +97,7 @@ object KaraokeMediaPlayer {
                         mediaPlayer.seekTo(currentPlayPosition)
                         nextIndexKaraokeLyric = -1
                         lyricTopTextView.isRunning = false
+                        lyricBotTextView.isRunning = false
                         startTrackingPositionMedia()
                     }
                 })
@@ -124,26 +125,13 @@ object KaraokeMediaPlayer {
                         durationSeekBar.progress = mediaPlayer.currentPosition
                         currentPlayPosition = mediaPlayer.currentPosition
                         currentTextView.text = HandleDateTime.miliSecondToTime(currentPlayPosition.toLong())
-                        if ( !lyricTopTextView.isRunning && nextIndexKaraokeLyric < karaokeLyric.size - 1) {
+                        if ( (!lyricTopTextView.isRunning && !lyricBotTextView.isRunning) && nextIndexKaraokeLyric < karaokeLyric.size - 1) {
 
-                            if ( nextIndexKaraokeLyric - currentIndexKaraokeLyric != 1) {
-                                findIndexPlayingLyric(mediaPlayer.currentPosition)
-                            }
-                            else {
-                                currentIndexKaraokeLyric ++
+                            when(playingMode ){
+                                KaraokeScreenActivity.MODE_KARAOKE -> lyricKaraokePlayingMode()
+                                KaraokeScreenActivity.MODE_RECORD, KaraokeScreenActivity.MODE_KARAOKE_TEST -> lyricRecordMode()
                             }
 
-                            if ( currentIndexKaraokeLyric == - 1) {
-                                currentIndexKaraokeLyric = karaokeLyric.size - 2
-                            }
-
-                            nextIndexKaraokeLyric = currentIndexKaraokeLyric + 1
-
-                            val playingLyric = karaokeLyric[currentIndexKaraokeLyric]
-                            val nextLyric = karaokeLyric[nextIndexKaraokeLyric]
-
-                            lyricBotTextView.text =  nextLyric.text
-                            lyricTopTextView.setKaraokeLyric(playingLyric, currentPlayPosition, mediaPlayer.isPlaying)
 
                         }
                     }
@@ -292,6 +280,7 @@ object KaraokeMediaPlayer {
         currentPlayPosition = mediaPlayer.currentPosition
         isPlaying = false
         lyricTopTextView.isRunning = isPlaying
+        lyricBotTextView.isRunning = isPlaying
         mediaPlayer.pause()
 
 
@@ -305,7 +294,7 @@ object KaraokeMediaPlayer {
         mediaPlayer.seekTo(currentPlayPosition)
         isPlaying = true
         mediaPlayer.start()
-        nextIndexKaraokeLyric = -1
+
         startTrackingPositionMedia()
 
     }
@@ -336,11 +325,13 @@ object KaraokeMediaPlayer {
 
         currentPlayPosition = -1
 
-        currentIndexKaraokeLyric = -1
+        currentIndexKaraokeLyric = 0
         nextIndexKaraokeLyric = 0
 
         try {
             lyricTopTextView.isRunning = false
+            lyricBotTextView.isRunning = false
+
             lyricTopTextView.visibility = View.INVISIBLE
             lyricBotTextView.visibility = View.INVISIBLE
             isInit = false
@@ -359,5 +350,56 @@ object KaraokeMediaPlayer {
             }
         }
     }
+
+    private fun lyricKaraokePlayingMode() {
+        if ( nextIndexKaraokeLyric - currentIndexKaraokeLyric != 1) {
+            findIndexPlayingLyric(mediaPlayer.currentPosition)
+            nextIndexKaraokeLyric = currentIndexKaraokeLyric + 1
+        }
+        else
+            currentIndexKaraokeLyric+= 2
+
+
+        if ( currentIndexKaraokeLyric == - 1) {
+            currentIndexKaraokeLyric = karaokeLyric.size - 2
+        }
+
+        val playingLyric = karaokeLyric[currentIndexKaraokeLyric]
+        val nextLyric = karaokeLyric[nextIndexKaraokeLyric]
+
+//        if (currentPlayPosition >= nextLyric.from || !lyricTopTextView.isRunning)
+            lyricTopTextView.setKaraokeLyric(playingLyric)
+
+//        if  (currentPlayPosition<= playingLyric.from || !lyricBotTextView.isRunning)
+            lyricBotTextView.setKaraokeLyric(nextLyric)
+
+        if ( currentPlayPosition >= playingLyric.from || lyricTopTextView.isRunning )
+            lyricTopTextView.play(currentPlayPosition)
+//        else if (  currentPlayPosition >= nextLyric.from || !lyricBotTextView.isRunning )
+        else
+            lyricBotTextView.play(currentPlayPosition)
+
+    }
+
+    private fun lyricRecordMode() {
+        findIndexPlayingLyric(mediaPlayer.currentPosition)
+        nextIndexKaraokeLyric = currentIndexKaraokeLyric + 1
+
+
+        if ( currentIndexKaraokeLyric == - 1) {
+            currentIndexKaraokeLyric = karaokeLyric.size - 2
+        }
+
+        val playingLyric = karaokeLyric[currentIndexKaraokeLyric]
+        val nextLyric = karaokeLyric[nextIndexKaraokeLyric]
+
+        lyricTopTextView.setKaraokeLyric(playingLyric)
+        lyricBotTextView.setKaraokeLyric(nextLyric)
+        if(!lyricTopTextView.isRunning || currentPlayPosition >= playingLyric.from)
+            lyricTopTextView.play(mediaPlayer.currentPosition)
+
+    }
+
+
     //endregion
 }

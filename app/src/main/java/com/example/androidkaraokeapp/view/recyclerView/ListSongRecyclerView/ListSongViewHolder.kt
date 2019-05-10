@@ -56,14 +56,18 @@ class ListSongViewHolder(itemView: View?) : RecyclerView.ViewHolder(itemView!!){
                 val db = FirestoreUlti.getInstance().db
                 val songCollection = db.collection(FirestoreUlti.Collection_SONG)
 
-                songCollection.document(song.id.toString()).update("isLiked", !song.isLiked)
+                song.isLiked = !song.isLiked
+                favoriteSongImageButtonAnimation()
+                songCollection.document(song.id.toString()).update("isLiked", song.isLiked)
                     .addOnSuccessListener {
 //                        Handle_UI().toastWithDuration("Lưu thành công ${!song.isLiked} ", 1, itemView.context)
-                        song.isLiked = !song.isLiked
-                        favoriteSongImageButtonAnimation()
+//                        song.isLiked = !song.isLiked
+//                        favoriteSongImageButtonAnimation()
                     }
                     .addOnFailureListener {
-                        Handle_UI().toastWithDuration("Thao tác thất bại!", 1, itemView.context)
+                        song.isLiked = !song.isLiked
+                        favoriteSongImageButtonAnimation()
+                        Handle_UI().toastWithDuration("Thao tác không thành công", 1, itemView.context)
                     }
             }
         }
