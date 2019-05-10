@@ -60,9 +60,6 @@ class ListSongViewHolder(itemView: View?) : RecyclerView.ViewHolder(itemView!!){
                 favoriteSongImageButtonAnimation()
                 songCollection.document(song.id.toString()).update("isLiked", song.isLiked)
                     .addOnSuccessListener {
-//                        Handle_UI().toastWithDuration("Lưu thành công ${!song.isLiked} ", 1, itemView.context)
-//                        song.isLiked = !song.isLiked
-//                        favoriteSongImageButtonAnimation()
                     }
                     .addOnFailureListener {
                         song.isLiked = !song.isLiked
