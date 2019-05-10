@@ -66,6 +66,9 @@ object HandleDiskLRUCache {
 
     fun initDiskLRUCache(mContext:Context) {
         context = mContext
+        val audioCacheFolder = File(context!!.cacheDir.path + "/audio-cache")
+        if ( !audioCacheFolder.exists())
+            audioCacheFolder.mkdir()
     }
 
     fun getSizeAudioCacheFolder():Long{
